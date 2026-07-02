@@ -327,6 +327,9 @@ export default function App() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
   const [showInscricaoForm, setShowInscricaoForm] = useState(false);
+  const [momName, setMomName] = useState('Mãe');
+  const [momPhone, setMomPhone] = useState('');
+  const [copied, setCopied] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isZoomingCabana, setIsZoomingCabana] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -1055,6 +1058,150 @@ export default function App() {
               </motion.div>
             )}
 
+            {currentStep === 'convince_mom' && (
+                <motion.div
+                  key="convince_mom"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col justify-start relative h-full text-white overflow-y-auto no-scrollbar p-5 space-y-4 text-left"
+                >
+                  <div className="text-center space-y-1">
+                    <span className="text-[#25D366] text-[9px] font-black tracking-[0.3em] uppercase block">
+                      OPERAÇÃO MÃE 🤫
+                    </span>
+                    <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
+                      CONVENÇA SUA MÃE!
+                    </h2>
+                    <div className="inline-block bg-[#25D366]/10 text-[#25D366] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#25D366]/15 tracking-widest uppercase mt-1">
+                      DICAS INFALÍVEIS + MENSAGEM
+                    </div>
+                  </div>
+
+                  {/* Tips Card */}
+                  <div className="bg-[#254b8c] border-2 border-[#2e5aa8] rounded-none p-3.5 space-y-2.5 text-[11px] text-gray-200">
+                    <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block">
+                      DICAS DE OURO:
+                    </span>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="w-5 h-5 rounded-full bg-[#dd681f]/20 border border-[#dd681f] text-[#dd681f] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</div>
+                      <div>
+                        <strong>Mostre a Segurança:</strong> Diga que o Acamps tem segurança 24h e monitores dedicados cuidando de tudo.
+                      </div>
+                    </div>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="w-5 h-5 rounded-full bg-[#dd681f]/20 border border-[#dd681f] text-[#dd681f] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</div>
+                      <div>
+                        <strong>Comida e Quarto Inclusos:</strong> Alojamento com quartos totalmente separados por gênero e 5 refeições caprichadas por dia inclusas!
+                      </div>
+                    </div>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="w-5 h-5 rounded-full bg-[#dd681f]/20 border border-[#dd681f] text-[#dd681f] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</div>
+                      <div>
+                        <strong>O Link das Mães:</strong> Envie o link feito sob medida para ela: <code className="text-[#25D366] bg-black/40 px-1 py-0.5 rounded">acampswintersp.up.railway.app/mamaes</code>
+                      </div>
+                    </div>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="w-5 h-5 rounded-full bg-[#dd681f]/20 border border-[#dd681f] text-[#dd681f] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">4</div>
+                      <div>
+                        <strong>O Acordo Sagrado:</strong> Prometa manter o quarto limpo e ajudar nas tarefas de casa por um mês inteiro. 😜
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Form section */}
+                  <div className="bg-[#254b8c]/30 border-2 border-dashed border-[#2e5aa8] p-4 space-y-3.5 text-left">
+                    <span className="text-[9px] text-gray-400 tracking-[0.2em] font-mono uppercase block text-center">PERSONALIZAR MENSAGEM</span>
+                    
+                    {/* Mother's Name Input */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-[#dd681f] tracking-wide uppercase block">COMO VOCÊ CHAMA SUA MÃE?</label>
+                      <div className="relative">
+                        <Icons.User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          type="text"
+                          value={momName}
+                          onChange={(e) => setMomName(e.target.value)}
+                          placeholder="Mãe, Mamãe, Mãezinha..."
+                          className="w-full bg-[#1b3b73]/60 border-2 border-[#2e5aa8] py-2 px-3 pl-10 text-white text-xs placeholder-gray-500 focus:outline-none focus:border-[#dd681f]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Mother's Phone Input (Optional) */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-[#dd681f] tracking-wide uppercase block">TELEFONE DA SUA MÃE (OPCIONAL)</label>
+                      <div className="relative">
+                        <Icons.Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          type="tel"
+                          value={momPhone}
+                          onChange={(e) => setMomPhone(e.target.value)}
+                          placeholder="(11) 99999-9999"
+                          className="w-full bg-[#1b3b73]/60 border-2 border-[#2e5aa8] py-2 px-3 pl-10 text-white text-xs placeholder-gray-500 focus:outline-none focus:border-[#dd681f]"
+                        />
+                      </div>
+                      <span className="text-[9px] text-gray-400 italic block">Se não colocar o telefone, você poderá selecionar o contato direto no WhatsApp.</span>
+                    </div>
+
+                    {/* Message Preview */}
+                    <div className="bg-[#122340] border border-[#2e5aa8] p-3 text-[10.5px] font-mono text-gray-300 rounded relative mt-2">
+                      <span className="absolute -top-2 left-3 bg-[#122340] px-1.5 text-[8px] text-[#25D366] font-bold tracking-widest uppercase">PRÉVIA DA MENSAGEM</span>
+                      <p className="whitespace-pre-wrap leading-relaxed mt-1">
+                        {`Oi ${momName || 'Mãe'}! Tudo bem? Olha que incrível esse acampamento de férias que a Comunidade Shalom está organizando. É o Acamps Winter! Vai ter gincana, festas, alojamentos seguros divididos por gênero, alimentação completa com 5 refeições por dia e monitores 24h acompanhando. Eles têm até um site com informações exclusivas para mães, dá uma olhada: https://acampswintersp.up.railway.app/mamaes. Eu quero muito ir, você deixa? ❤️`}
+                      </p>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex flex-col gap-2 pt-1.5">
+                      <button
+                        onClick={() => {
+                          const messageText = `Oi ${momName || 'Mãe'}! Tudo bem? Olha que incrível esse acampamento de férias que a Comunidade Shalom está organizando. É o Acamps Winter! Vai ter gincana, festas, alojamentos seguros divididos por gênero, alimentação completa com 5 refeições por dia e monitores 24h acompanhando. Eles têm até um site com informações exclusivas para mães, dá uma olhada: https://acampswintersp.up.railway.app/mamaes. Eu quero muito ir, você deixa? ❤️`;
+                          const cleanPhone = momPhone.replace(/\D/g, '');
+                          
+                          let url = '';
+                          if (cleanPhone) {
+                            const fullPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+                            url = `https://api.whatsapp.com/send?phone=${fullPhone}&text=${encodeURIComponent(messageText)}`;
+                          } else {
+                            url = `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+                          }
+                          window.open(url, '_blank');
+                        }}
+                        className="w-full bg-[#25D366] hover:bg-[#1ebd59] text-white py-3 px-4 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
+                      >
+                        <Icons.Send className="w-4 h-4" />
+                        ENVIAR PARA ELA
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          const messageText = `Oi ${momName || 'Mãe'}! Tudo bem? Olha que incrível esse acampamento de férias que a Comunidade Shalom está organizando. É o Acamps Winter! Vai ter gincana, festas, alojamentos seguros divididos por gênero, alimentação completa com 5 refeições por dia e monitores 24h acompanhando. Eles têm até um site com informações exclusivas para mães, dá uma olhada: https://acampswintersp.up.railway.app/mamaes. Eu quero muito ir, você deixa? ❤️`;
+                          navigator.clipboard.writeText(messageText);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                        className="w-full bg-[#1b3b73] hover:bg-[#2e5aa8] border border-[#2e5aa8] text-white py-2.5 px-4 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
+                      >
+                        {copied ? <Icons.Check className="w-4 h-4 text-green-400" /> : <Icons.Copy className="w-4 h-4" />}
+                        {copied ? 'MENSAGEM COPIADA!' : 'COPIAR TEXTO DA MENSAGEM'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Back button */}
+                  <div className="pt-1 pb-4">
+                    <button
+                      onClick={() => setCurrentStep('details_registration')}
+                      className="w-full bg-transparent hover:bg-white/5 border border-white/20 text-white font-bold py-2.5 px-4 text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
+                    >
+                      <Icons.ArrowLeft className="w-4 h-4" />
+                      VOLTAR PARA DETALHES
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
               {/* STEP 5: DETAILS AND REGISTRATION FORM */}
               {currentStep === 'details_registration' && (
                 <motion.div
@@ -1226,7 +1373,7 @@ export default function App() {
 
                       <PriceSection />
 
-                      <div className="pt-2 pb-4">
+                      <div className="pt-2 pb-4 space-y-2.5">
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
@@ -1235,6 +1382,16 @@ export default function App() {
                         >
                           QUERO ME INSCREVER
                           <Icons.ChevronRight className="w-4 h-4" />
+                        </motion.button>
+
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setCurrentStep('convince_mom')}
+                          className="w-full bg-[#25D366] hover:bg-white hover:text-[#128C7E] text-white border-2 border-transparent hover:border-[#25D366] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 shadow-[0_0_15px_rgba(37,211,102,0.3)] animate-pulse"
+                        >
+                          <Icons.MessageCircle className="w-4.5 h-4.5 fill-current" />
+                          QUERO IR! (PEDIR PRA MAMÃE)
                         </motion.button>
                       </div>
                     </div>
