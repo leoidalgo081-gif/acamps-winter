@@ -97,6 +97,7 @@ export const EVENT_INFO = {
   targetAge: 'PARA JOVENS DE 14 A 17 ANOS',
   location: 'Embu das Artes - SP',
   address: 'Alameda Fernando Batista Medina, 770, Embu das Artes - SP',
+  whatsappNumber: '5511999999999', // DIGITE SEU WHATSAPP AQUI (DDI + DDD + número, sem espaços/traços, ex: 5511999999999)
   features: [
     { label: 'HOSPEDAGEM INCLUSA', description: 'Estrutura completa para os 3 dias', icon: 'Home' },
     { label: 'ALIMENTAÇÃO COMPLETA', description: 'Todas as refeições inclusas no pacote', icon: 'Utensils' },
