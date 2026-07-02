@@ -153,16 +153,6 @@ export const MOMS_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 5,
-    text: 'Qual é o seu nível de preocupação com a alimentação dele fora de casa?',
-    image: 'https://images.unsplash.com/photo-1484712401471-05c7215a69eb?q=80&w=600',
-    options: [
-      { text: 'Alta, ele é muito exigente ou alérgico.', icon: 'AlertTriangle' },
-      { text: 'Média, mas fico calma sabendo que é completa.', icon: 'Utensils' },
-      { text: 'Nenhuma, confio plenamente na equipe.', icon: 'CheckCircle' },
-    ],
-  },
-  {
-    id: 6,
     text: 'Você gostaria de proporcionar a ele uma experiência inesquecível de espiritualidade e encontro com o amor de Deus?',
     image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=600',
     options: [
