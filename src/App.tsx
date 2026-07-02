@@ -125,7 +125,7 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.18,
+      staggerChildren: 0.5,
       delayChildren: 0.1,
     }
   }
@@ -532,9 +532,10 @@ export default function App() {
                 animate="visible"
                 exit="exit"
                 variants={containerVariants}
-                className="flex-1 flex flex-col justify-between p-5 relative h-full text-white"
+                className="flex-1 flex flex-col justify-between p-4 relative h-full text-white"
               >
-                <div className="space-y-4">
+                <div className="space-y-3 flex-1 flex flex-col justify-center">
+                  {/* 1. Header */}
                   <motion.div className="text-center flex flex-col items-center justify-center" variants={itemVariants}>
                     <span className="text-[#dd681f] text-[9px] font-black tracking-[0.25em] uppercase block mb-1">
                       O QUE VOCÊ PROCURA...
@@ -543,21 +544,21 @@ export default function App() {
                       <TitleAnimator text="Não seja apenas um lugar" delayOffset={0.1} />
                     </h3>
                     <h4 className="text-[12px] font-bold uppercase text-gray-300 leading-tight mt-0.5">
-                      <TitleAnimator text="seja uma" delayOffset={0.4} />
+                      <TitleAnimator text="seja uma" delayOffset={0.3} />
                     </h4>
                     <h2 className="text-[#dd681f] text-lg font-black uppercase tracking-widest leading-none mt-1">
-                      <TitleAnimator text="Experiência." delayOffset={0.7} />
+                      <TitleAnimator text="Experiência." delayOffset={0.5} />
                     </h2>
                   </motion.div>
 
-                  {/* Vertical List of Camp Memories with background images */}
-                  <div className="space-y-2.5 max-w-[280px] mx-auto w-full">
+                  {/* 2. Vertical List of Camp Memories with background images */}
+                  <motion.div className="space-y-2 max-w-[280px] mx-auto w-full" variants={containerVariants}>
                     {REVELATION_COLLAGE.map((img, idx) => (
                       <motion.div
                         key={idx}
                         variants={itemVariants}
                         whileHover={{ scale: 1.02 }}
-                        className="h-16 rounded-2xl overflow-hidden border border-[#2e5aa8]/60 relative shadow-lg transition-all flex items-center justify-center group"
+                        className="h-18 rounded-2xl overflow-hidden border border-[#2e5aa8]/60 relative shadow-lg transition-all flex items-center justify-center group"
                       >
                         {/* Background Image filling the card */}
                         <img
@@ -567,15 +568,15 @@ export default function App() {
                           className="absolute inset-0 w-full h-full object-cover grayscale-[15%] group-hover:scale-105 transition-transform duration-500 z-0"
                         />
                         {/* Gradient Overlay for text contrast */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/70 group-hover:from-black/60 group-hover:to-black/60 transition-colors z-10" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/75 group-hover:from-black/60 group-hover:to-black/60 transition-colors z-10" />
 
                         {/* Title text centered on top */}
-                        <span className="relative z-20 text-[13px] font-black uppercase text-white tracking-[0.25em] font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                        <span className="relative z-20 text-[14px] font-black uppercase text-white tracking-[0.25em] font-mono drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                           {img.alt}
                         </span>
                       </motion.div>
                     ))}
-                  </div>
+                  </motion.div>
 
                   {/* Stamp Container with Floating Cabana */}
                   <div className="relative max-w-[280px] mx-auto mt-2">
@@ -591,7 +592,7 @@ export default function App() {
                             type: "spring", 
                             stiffness: 400, 
                             damping: 15, 
-                            delay: 0.9 
+                            delay: 2.5 
                           } 
                         }
                       }}
@@ -614,19 +615,27 @@ export default function App() {
                         rotate: [-2, 4, -4, -2]
                       }}
                       transition={{
-                        opacity: { delay: 1.3 },
-                        scale: { type: "spring", stiffness: 150, damping: 10, delay: 1.3 },
+                        opacity: { delay: 2.9 },
+                        scale: { type: "spring", stiffness: 150, damping: 10, delay: 2.9 },
                         y: { repeat: Infinity, duration: 2.2, ease: "easeInOut" },
                         rotate: { repeat: Infinity, duration: 3.5, ease: "easeInOut" }
                       }}
-                      className="absolute -top-7 -right-7 w-16 h-16 z-20 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] pointer-events-none"
+                      className="absolute -top-9 -right-9 w-22 h-22 z-20 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)] pointer-events-none"
                     >
                       <img src="/cabana.png" alt="Cabana" className="w-full h-full object-contain" />
                     </motion.div>
                   </div>
                 </div>
 
-                <motion.div className="pt-4 pb-2" variants={itemVariants}>
+                <motion.div 
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: 0,
+                    transition: { delay: 3.2, type: "spring", stiffness: 100, damping: 12 }
+                  }}
+                  className="pt-4 pb-2"
+                >
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
