@@ -809,18 +809,37 @@ export default function App() {
                 <div className="space-y-3 flex-1 flex flex-col justify-center">
                   {/* 1. Header */}
                   <motion.div className="text-center flex flex-col items-center justify-center" variants={itemVariants}>
-                    <span className="text-[#dd681f] text-[9px] font-black tracking-[0.25em] uppercase block mb-1">
-                      O QUE VOCÊ PROCURA...
-                    </span>
-                    <h3 className="text-sm font-black tracking-tight uppercase text-white leading-tight">
-                      <TitleAnimator text="Não seja apenas um lugar" delayOffset={0.1} />
-                    </h3>
-                    <h4 className="text-[12px] font-bold uppercase text-gray-300 leading-tight mt-0.5">
-                      <TitleAnimator text="seja uma" delayOffset={0.3} />
-                    </h4>
-                    <h2 className="text-[#dd681f] text-lg font-black uppercase tracking-widest leading-none mt-1">
-                      <TitleAnimator text="Experiência." delayOffset={0.5} />
-                    </h2>
+                    {isMomsMode ? (
+                      <>
+                        <span className="text-[#dd681f] text-[9px] font-black tracking-[0.25em] uppercase block mb-1">
+                          CONFIRMAÇÃO DO ACAMPAMENTO
+                        </span>
+                        <h3 className="text-xs font-black tracking-tight uppercase text-white leading-tight">
+                          <TitleAnimator text="É uma confirmação:" delayOffset={0.1} />
+                        </h3>
+                        <h4 className="text-[12px] font-bold uppercase text-gray-300 leading-tight mt-0.5">
+                          <TitleAnimator text="Teremos tudo isso!" delayOffset={0.3} />
+                        </h4>
+                        <h2 className="text-[#dd681f] text-sm font-black uppercase tracking-widest leading-none mt-1">
+                          <TitleAnimator text="Monitores, alimentação e Deus." delayOffset={0.5} />
+                        </h2>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-[#dd681f] text-[9px] font-black tracking-[0.25em] uppercase block mb-1">
+                          O QUE VOCÊ PROCURA...
+                        </span>
+                        <h3 className="text-sm font-black tracking-tight uppercase text-white leading-tight">
+                          <TitleAnimator text="Não seja apenas um lugar" delayOffset={0.1} />
+                        </h3>
+                        <h4 className="text-[12px] font-bold uppercase text-gray-300 leading-tight mt-0.5">
+                          <TitleAnimator text="seja uma" delayOffset={0.3} />
+                        </h4>
+                        <h2 className="text-[#dd681f] text-lg font-black uppercase tracking-widest leading-none mt-1">
+                          <TitleAnimator text="Experiência." delayOffset={0.5} />
+                        </h2>
+                      </>
+                    )}
                   </motion.div>
 
                   {/* 2. Vertical List of Camp Memories with background images */}
@@ -920,8 +939,17 @@ export default function App() {
                     }}
                     className="w-full bg-[#dd681f] hover:bg-white hover:text-[#254b8c] text-white border-2 border-transparent hover:border-[#dd681f] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
                   >
-                    FAZER MINHA INSCRIÇÃO
-                    <Icons.ChevronRight className="w-4 h-4" />
+                    {isMomsMode ? (
+                      <>
+                        QUERO LEVAR MEU FILHO
+                        <Icons.Heart className="w-4 h-4 fill-current" />
+                      </>
+                    ) : (
+                      <>
+                        FAZER MINHA INSCRIÇÃO
+                        <Icons.ChevronRight className="w-4 h-4" />
+                      </>
+                    )}
                   </motion.button>
                 </motion.div>
               </motion.div>

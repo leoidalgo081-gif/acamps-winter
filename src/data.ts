@@ -127,7 +127,7 @@ export const MOMS_QUESTIONS: QuizQuestion[] = [
     options: [
       { text: 'Seria maravilhoso para nós dois!', icon: 'Smile' },
       { text: 'Tenho receio de deixá-lo ir sozinho', icon: 'ShieldAlert' },
-      { text: 'Quero saber mais sobre os alojamentos', icon: 'Home' },
+      { text: 'Quero saber mais sobre a segurança', icon: 'ShieldCheck' },
     ],
   },
   {
@@ -139,6 +139,36 @@ export const MOMS_QUESTIONS: QuizQuestion[] = [
       { text: 'Alimentação completa (5 refeições/dia)', icon: 'Utensils' },
       { text: 'Equipe de monitores e segurança 24h', icon: 'ShieldCheck' },
       { text: 'Todos esses itens inclusos!', icon: 'Sparkles' },
+    ],
+  },
+  {
+    id: 4,
+    text: 'Você gostaria que seu filho fizesse amizades saudáveis com jovens que compartilham dos mesmos valores de fé e família?',
+    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=600',
+    options: [
+      { text: 'Com certeza, isso faz toda a diferença!', icon: 'Heart' },
+      { text: 'Sim, ele precisa de bons amigos.', icon: 'Users' },
+      { text: 'Espero que ele se socialize mais.', icon: 'Smile' },
+    ],
+  },
+  {
+    id: 5,
+    text: 'Qual é o seu nível de preocupação com a alimentação dele fora de casa?',
+    image: 'https://images.unsplash.com/photo-1484712401471-05c7215a69eb?q=80&w=600',
+    options: [
+      { text: 'Alta, ele é muito exigente ou alérgico.', icon: 'AlertTriangle' },
+      { text: 'Média, mas fico calma sabendo que é completa.', icon: 'Utensils' },
+      { text: 'Nenhuma, confio plenamente na equipe.', icon: 'CheckCircle' },
+    ],
+  },
+  {
+    id: 6,
+    text: 'Você gostaria de proporcionar a ele uma experiência inesquecível de espiritualidade e encontro com o amor de Deus?',
+    image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=600',
+    options: [
+      { text: 'Sim, esse é o maior tesouro!', icon: 'Flame' },
+      { text: 'Com certeza, seria excelente para a vida dele.', icon: 'Sparkles' },
+      { text: 'Gostaria que ele conhecesse mais a fé.', icon: 'BookOpen' },
     ],
   },
 ];
