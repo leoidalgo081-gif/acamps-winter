@@ -198,6 +198,7 @@ export default function App() {
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
   const [showInscricaoForm, setShowInscricaoForm] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isZoomingCabana, setIsZoomingCabana] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Initialize audio on mount and setup autoplay listeners
@@ -402,7 +403,11 @@ export default function App() {
                 <Snowflakes inside={true} />
 
                 {/* 1. Header / Logo Title (Top) */}
-                <div className="space-y-1 pt-1 w-full px-1 flex flex-col items-center relative z-10">
+                <motion.div 
+                  animate={isZoomingCabana ? { opacity: 0, scale: 0.9, y: -20, filter: "blur(4px)" } : { opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  className="space-y-1 pt-1 w-full px-1 flex flex-col items-center relative z-10"
+                >
                   <div className="flex justify-center mb-1">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#dd681f]/10 border border-[#dd681f]/30 text-[9px] text-[#dd681f] font-black uppercase tracking-[0.25em] rounded-full shadow-[0_0_15px_rgba(221,104,31,0.2)]">
                       <Icons.Tent className="w-3 h-3" />
@@ -411,10 +416,14 @@ export default function App() {
                   </div>
                   {/* Official branding logo */}
                   <LogoAcamps className="w-full max-w-[210px] mx-auto pt-0 pb-0" />
-                </div>
+                </motion.div>
                   
                 {/* 2. Reference Photo Text (Center) */}
-                <div className="w-full max-w-[300px] mx-auto space-y-4 text-center px-2 py-1 relative z-10">
+                <motion.div 
+                  animate={isZoomingCabana ? { opacity: 0, scale: 0.9, y: -10, filter: "blur(4px)" } : { opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                  className="w-full max-w-[300px] mx-auto space-y-4 text-center px-2 py-1 relative z-10"
+                >
                   <p className="text-white text-[21px] leading-snug drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-bold tracking-wide flex justify-center items-center gap-1.5 flex-wrap">
                     <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.1 }} className="transform -rotate-2 inline-block">Não</motion.span>
                     <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.3 }} className="transform rotate-2 text-gray-300 inline-block">existem</motion.span>
@@ -449,18 +458,39 @@ export default function App() {
                       SEU CORAÇÃO
                     </motion.span>
                   </p>
-                </div>
-
+                </motion.div>
+ 
                 {/* 3. Tent Icon & Button (Bottom) */}
                 <div className="w-full max-w-[280px] mx-auto flex flex-col items-center space-y-4 pb-2 relative z-10">
-                  <img src="/cabana.png" alt="Cabana" className="w-10 h-10 object-contain opacity-95 drop-shadow-lg" />
+                  <motion.img 
+                    src="/cabana.png" 
+                    alt="Cabana" 
+                    animate={isZoomingCabana ? {
+                      scale: [1, 2, 75],
+                      y: [0, -30, -180],
+                      rotate: [0, -5, 5, 0],
+                      opacity: [1, 1, 1, 0],
+                      filter: ["brightness(1) contrast(1)", "brightness(1.8) contrast(1.2)", "brightness(0) contrast(2)"]
+                    } : {}}
+                    transition={isZoomingCabana ? {
+                      duration: 0.95,
+                      ease: [0.6, 0.01, 0.35, 1]
+                    } : {}}
+                    className="w-10 h-10 object-contain opacity-95 drop-shadow-lg relative z-[999]" 
+                  />
                   
                   <motion.button
+                    animate={isZoomingCabana ? { opacity: 0, y: 30, scale: 0.95 } : { opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.4 }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => {
                       startMusicOnInteract();
-                      setCurrentStep('quiz');
+                      setIsZoomingCabana(true);
+                      setTimeout(() => {
+                        setCurrentStep('quiz');
+                        setIsZoomingCabana(false);
+                      }, 900);
                     }}
                     className="w-full bg-[#dd681f] text-white font-black text-[15px] py-4 px-6 rounded-2xl tracking-[0.2em] uppercase transition-all duration-300 shadow-[0_0_20px_rgba(221,104,31,0.6)] hover:shadow-[0_0_35px_rgba(221,104,31,0.9)] border border-[#dd681f]/50 cursor-pointer"
                   >
