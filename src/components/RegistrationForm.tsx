@@ -144,6 +144,7 @@ export default function RegistrationForm({ onSubmit, onBack }: RegistrationFormP
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
+                autoComplete="name"
                 placeholder="SEU NOME COMPLETO"
                 className={`w-full bg-[#254b8c] border-2 ${
                   errors.fullName ? 'border-red-600' : 'border-[#2e5aa8]'
@@ -172,6 +173,7 @@ export default function RegistrationForm({ onSubmit, onBack }: RegistrationFormP
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
+                  autoComplete="email"
                   placeholder="SEU EMAIL"
                   className={`w-full bg-[#254b8c] border-2 ${
                     errors.email ? 'border-red-600' : 'border-[#2e5aa8]'
@@ -196,6 +198,7 @@ export default function RegistrationForm({ onSubmit, onBack }: RegistrationFormP
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  autoComplete="tel"
                   placeholder="(00) 00000-0000"
                   className={`w-full bg-[#254b8c] border-2 ${
                     errors.phone ? 'border-red-600' : 'border-[#2e5aa8]'
@@ -306,6 +309,7 @@ export default function RegistrationForm({ onSubmit, onBack }: RegistrationFormP
                 name="parentPhone"
                 value={formData.parentPhone}
                 onChange={handleChange}
+                autoComplete="tel"
                 placeholder="(00) 90000-0000"
                 className={`w-full bg-[#254b8c] border-2 ${
                   errors.parentPhone ? 'border-red-600' : 'border-[#2e5aa8]'
