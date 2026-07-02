@@ -200,7 +200,7 @@ export default function App() {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize audio on mount
+  // Initialize audio on mount and setup autoplay listeners
   useEffect(() => {
     const audio = new Audio('/acampswinter.mp3');
     audio.loop = false; // Play first audio only once
@@ -217,11 +217,49 @@ export default function App() {
 
     audio.addEventListener('ended', handleAudioEnded);
 
+    // Try to autoplay on user interaction
+    const startAutoplay = () => {
+      audio.play()
+        .then(() => {
+          setIsMusicPlaying(true);
+          window.removeEventListener('click', startAutoplay);
+          window.removeEventListener('touchstart', startAutoplay);
+        })
+        .catch((err) => {
+          console.log('Autoplay blocked, waiting for interaction...');
+        });
+    };
+
+    window.addEventListener('click', startAutoplay);
+    window.addEventListener('touchstart', startAutoplay);
+
+    // Initial check
+    startAutoplay();
+
     return () => {
       audio.removeEventListener('ended', handleAudioEnded);
+      window.removeEventListener('click', startAutoplay);
+      window.removeEventListener('touchstart', startAutoplay);
       audio.pause();
     };
   }, []);
+
+  // Listen to step transitions to adjust audio tracks automatically
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    if (currentStep === 'quiz') {
+      // Force switch to acampswinter3.mp3 on loop
+      if (!audioRef.current.src.endsWith('/acampswinter3.mp3')) {
+        audioRef.current.pause();
+        audioRef.current.src = '/acampswinter3.mp3';
+        audioRef.current.loop = true;
+        if (isMusicPlaying) {
+          audioRef.current.play().catch((err) => console.log('Erro ao tocar áudio 2:', err));
+        }
+      }
+    }
+  }, [currentStep, isMusicPlaying]);
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
@@ -280,6 +318,17 @@ export default function App() {
     setSelectedAnswers({});
     setCurrentQuestionIdx(0);
     setShowInscricaoForm(false);
+
+    // Reset audio back to track 1
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '/acampswinter.mp3';
+      audioRef.current.loop = false;
+      if (isMusicPlaying) {
+        audioRef.current.play().catch((err) => console.log(err));
+      }
+    }
+
     setCurrentStep('home');
   };
 
@@ -304,14 +353,38 @@ export default function App() {
           {/* Floating speaker mute/unmute control inside cellphone */}
           <button
             onClick={toggleMusic}
-            className="absolute top-12 right-4 z-50 p-2 bg-[#254b8c]/50 border border-[#2e5aa8]/40 text-white rounded-full hover:bg-[#dd681f] transition-all cursor-pointer shadow-[0_0_10px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95"
+            className="absolute top-12 right-4 z-50 p-2.5 bg-[#254b8c]/50 border border-[#2e5aa8]/40 text-white rounded-full hover:bg-[#dd681f] transition-all cursor-pointer shadow-[0_0_10px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 flex items-center gap-1.5 overflow-hidden"
             title={isMusicPlaying ? 'Mutar Música' : 'Tocar Música'}
           >
-            {isMusicPlaying ? (
-              <Icons.Volume2 className="w-3.5 h-3.5 animate-pulse text-[#dd681f]" />
-            ) : (
-              <Icons.VolumeX className="w-3.5 h-3.5 text-gray-400" />
+            {/* Glowing pulse ring around button if playing */}
+            {isMusicPlaying && (
+              <span className="absolute inset-0 rounded-full border border-[#dd681f]/80 animate-ping opacity-60 pointer-events-none" />
             )}
+
+            {isMusicPlaying ? (
+              <Icons.Volume2 className="w-3.5 h-3.5 text-[#dd681f] shrink-0" />
+            ) : (
+              <Icons.VolumeX className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            )}
+
+            {/* Micro-equalizer bars indicating sound waves / vibrations */}
+            <div className="flex items-end gap-[1.5px] h-2.5 shrink-0 pl-0.5">
+              <motion.div
+                animate={isMusicPlaying ? { height: [2, 8, 2] } : { height: 2 }}
+                transition={{ repeat: Infinity, duration: 0.6, ease: "easeInOut" }}
+                className={`w-[2px] rounded-full transition-colors ${isMusicPlaying ? 'bg-[#dd681f]' : 'bg-gray-400'}`}
+              />
+              <motion.div
+                animate={isMusicPlaying ? { height: [1.5, 10, 1.5] } : { height: 1.5 }}
+                transition={{ repeat: Infinity, duration: 0.45, ease: "easeInOut", delay: 0.1 }}
+                className={`w-[2px] rounded-full transition-colors ${isMusicPlaying ? 'bg-[#dd681f]' : 'bg-gray-400'}`}
+              />
+              <motion.div
+                animate={isMusicPlaying ? { height: [2, 6, 2] } : { height: 2 }}
+                transition={{ repeat: Infinity, duration: 0.55, ease: "easeInOut", delay: 0.2 }}
+                className={`w-[2px] rounded-full transition-colors ${isMusicPlaying ? 'bg-[#dd681f]' : 'bg-gray-400'}`}
+              />
+            </div>
           </button>
 
           <AnimatePresence mode="wait">
