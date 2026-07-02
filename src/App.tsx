@@ -298,6 +298,8 @@ const PriceSection = () => {
   );
 };
 
+const REGISTRATION_URL = "https://www.e-inscricao.com/comunidade-catlica-shalom-so-paulo/acampswintersp?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAdGRleASzs-RwZG9mAmV4dG4DYWVtAjExAHNydGMGYXBwX2lkDzEyNDAyNDU3NDI4NzQxNAABp9rCSn3vmfHJTv62neLVOWA9FR4P8htDKJw45V6UJ2o6DIvlCqjgrNU-_C4Z_aem_YtXIOg2BP5n4I4xM6k28IQ#payment-information-section";
+
 export default function App() {
   const [currentStep, setCurrentStep] = useState<AppStep>('home');
   const [isMomsMode, setIsMomsMode] = useState(false);
@@ -1022,11 +1024,7 @@ export default function App() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      if (registration) {
-                        setCurrentStep('ticket');
-                      } else {
-                        setCurrentStep('details_registration');
-                      }
+                      setCurrentStep('details_registration');
                     }}
                     className="w-full bg-[#dd681f] hover:bg-white hover:text-[#254b8c] text-white border-2 border-transparent hover:border-[#dd681f] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
                   >
@@ -1067,199 +1065,179 @@ export default function App() {
                   exit={{ opacity: 0 }}
                   className="flex-1 flex flex-col justify-start relative h-full text-white overflow-y-auto no-scrollbar"
                 >
-                  {!showInscricaoForm ? (
-                    isMomsMode ? (
-                      <div className="p-5 space-y-4">
-                        {/* Logo and Event Details Summary */}
-                        <div className="text-center space-y-1">
-                          <span className="text-[#dd681f] text-[9px] font-black tracking-[0.3em] uppercase block">
-                            PROPOSTA PARA MAMÃES
-                          </span>
-                          <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
-                            ACAMP'S WINTER SP
-                          </h2>
-                          <div className="inline-block bg-[#dd681f]/10 text-[#dd681f] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#dd681f]/15 tracking-widest uppercase mt-1">
-                            A ESTRUTURA MAIS SEGURA PARA SEU FILHO
+                  {isMomsMode ? (
+                    <div className="p-5 space-y-4">
+                      {/* Logo and Event Details Summary */}
+                      <div className="text-center space-y-1">
+                        <span className="text-[#dd681f] text-[9px] font-black tracking-[0.3em] uppercase block">
+                          PROPOSTA PARA MAMÃES
+                        </span>
+                        <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
+                          ACAMP'S WINTER SP
+                        </h2>
+                        <div className="inline-block bg-[#dd681f]/10 text-[#dd681f] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#dd681f]/15 tracking-widest uppercase mt-1">
+                          A ESTRUTURA MAIS SEGURA PARA SEU FILHO
+                        </div>
+                      </div>
+
+                      {/* Info highlights card */}
+                      <div className="bg-[#254b8c] border-2 border-[#2e5aa8] rounded-none p-3.5 space-y-3.5 leading-relaxed text-[11px] text-gray-200">
+                        <div className="flex items-start gap-2.5">
+                          <Icons.Shield className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="text-white block uppercase tracking-wide">QUARTOS E MORADIA SEGURA:</strong>
+                            Alojamentos confortáveis com quartos 100% separados por gênero e segurança monitorada por monitores responsáveis 24h por dia.
                           </div>
                         </div>
 
-                        {/* Info highlights card */}
-                        <div className="bg-[#254b8c] border-2 border-[#2e5aa8] rounded-none p-3.5 space-y-3.5 leading-relaxed text-[11px] text-gray-200">
-                          <div className="flex items-start gap-2.5">
-                            <Icons.Shield className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
-                            <div>
-                              <strong className="text-white block uppercase tracking-wide">QUARTOS E MORADIA SEGURA:</strong>
-                              Alojamentos confortáveis com quartos 100% separados por gênero e segurança monitorada por monitores responsáveis 24h por dia.
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-2.5 border-t-2 border-[#2e5aa8] pt-2.5">
-                            <Icons.Utensils className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
-                            <div>
-                              <strong className="text-white block uppercase tracking-wide">ALIMENTAÇÃO COMPLETA (5 REFEIÇÕES/DIA):</strong>
-                              Cardápio delicioso preparado com carinho para os 3 dias inclusos:
-                              <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[10px] font-mono text-gray-400 uppercase tracking-wider pl-1">
-                                <span>🍳 CAFÉ DA MANHÃ</span>
-                                <span>🍲 ALMOÇO</span>
-                                <span>🍰 LANCHE DA TARDE</span>
-                                <span>🍕 JANTAR</span>
-                                <span className="col-span-2">🥪 LANCHE DA NOITE</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-2.5 border-t-2 border-[#2e5aa8] pt-2.5">
-                            <Icons.Award className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
-                            <div>
-                              <strong className="text-white block uppercase tracking-wide">CREDIBILIDADE COMPROVADA:</strong>
-                              A Comunidade Shalom é reconhecida nacionalmente com mais de 40 anos de experiência na formação de jovens em convivência comunitária, brincadeiras e espiritualidade com Deus.
+                        <div className="flex items-start gap-2.5 border-t-2 border-[#2e5aa8] pt-2.5">
+                          <Icons.Utensils className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="text-white block uppercase tracking-wide">ALIMENTAÇÃO COMPLETA (5 REFEIÇÕES/DIA):</strong>
+                            Cardápio delicioso preparado com carinho para os 3 dias inclusos:
+                            <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[10px] font-mono text-gray-400 uppercase tracking-wider pl-1">
+                              <span>🍳 CAFÉ DA MANHÃ</span>
+                              <span>🍲 ALMOÇO</span>
+                              <span>🍰 LANCHE DA TARDE</span>
+                              <span>🍕 JANTAR</span>
+                              <span className="col-span-2">🥪 LANCHE DA NOITE</span>
                             </div>
                           </div>
                         </div>
 
-                        {/* Animated Price Countdown */}
-                        <PriceSection />
-
-                        <div className="text-center py-1">
-                          <p className="text-[12px] font-black text-white uppercase tracking-wide leading-tight">
-                            Gostaria de inscrever{' '}
-                            <span className="inline-block font-black text-[#dd681f]">
-                              <AnimatePresence mode="wait">
-                                <motion.span
-                                  key={isFeminine ? 'suafilha_form' : 'seufilho_form'}
-                                  initial={{ opacity: 0, y: 3 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: -3 }}
-                                  transition={{ duration: 0.2 }}
-                                  className="inline-block"
-                                >
-                                  {isFeminine ? 'SUA FILHA' : 'SEU FILHO'}
-                                </motion.span>
-                              </AnimatePresence>
-                            </span>{' '}
-                            nesta experiência?
-                          </p>
+                        <div className="flex items-start gap-2.5 border-t-2 border-[#2e5aa8] pt-2.5">
+                          <Icons.Award className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="text-white block uppercase tracking-wide">CREDIBILIDADE COMPROVADA:</strong>
+                            A Comunidade Shalom é reconhecida nacionalmente com mais de 40 anos de experiência na formação de jovens em convivência comunitária, brincadeiras e espiritualidade com Deus.
+                          </div>
                         </div>
+                      </div>
 
-                        <div className="pt-1 pb-4">
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setShowInscricaoForm(true)}
-                            className="w-full bg-[#25D366] hover:bg-white hover:text-[#128C7E] text-white border-2 border-transparent hover:border-[#25D366] font-black py-4 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 shadow-[0_0_20px_rgba(37,211,102,0.4)] animate-pulse"
-                          >
-                            <Icons.Sparkles className="w-4 h-4" />
-                            SIM, INSCREVER{' '}
+                      {/* Animated Price Countdown */}
+                      <PriceSection />
+
+                      <div className="text-center py-1">
+                        <p className="text-[12px] font-black text-white uppercase tracking-wide leading-tight">
+                          Gostaria de inscrever{' '}
+                          <span className="inline-block font-black text-[#dd681f]">
                             <AnimatePresence mode="wait">
                               <motion.span
-                                key={isFeminine ? 'minhafilha_btn' : 'meufilho_btn'}
+                                key={isFeminine ? 'suafilha_form' : 'seufilho_form'}
                                 initial={{ opacity: 0, y: 3 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -3 }}
                                 transition={{ duration: 0.2 }}
                                 className="inline-block"
                               >
-                                {isFeminine ? 'MINHA FILHA!' : 'MEU FILHO!'}
+                                {isFeminine ? 'SUA FILHA' : 'SEU FILHO'}
                               </motion.span>
                             </AnimatePresence>
-                          </motion.button>
-                        </div>
+                          </span>{' '}
+                          nesta experiência?
+                        </p>
                       </div>
-                    ) : (
-                      <div className="p-5 space-y-4">
-                        {/* Logo and Event Details Summary */}
-                        <div className="text-center space-y-1">
-                          <span className="text-[#dd681f] text-[9px] font-black tracking-[0.3em] uppercase block">
-                            INFORMAÇÕES GERAIS
-                          </span>
-                          <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
-                            ACAMP'S WINTER
-                          </h2>
-                          <div className="inline-block bg-[#dd681f]/10 text-[#dd681f] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#dd681f]/15 tracking-widest uppercase mt-1">
-                            {EVENT_INFO.targetAge.toUpperCase()}
-                          </div>
-                        </div>
 
-                        {/* Info highlights card (Sharp Corners, stark borders) */}
-                        <div className="bg-[#254b8c] border-2 border-[#2e5aa8] rounded-none p-3.5 space-y-3.5">
-                          <div className="flex items-center gap-2.5 text-xs">
-                            <Icons.Calendar className="w-4 h-4 text-[#dd681f] shrink-0" />
-                            <div>
-                              <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">DATAS</span>
-                              <span className="font-bold text-white block mt-0.5 font-mono uppercase">{EVENT_INFO.dates.toUpperCase()}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-start gap-2.5 text-xs border-t-2 border-[#2e5aa8] pt-2.5">
-                            <Icons.MapPin className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
-                            <div>
-                              <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">LOCAL</span>
-                              <span className="font-bold text-white block mt-0.5 uppercase tracking-wide">{EVENT_INFO.location.toUpperCase()}</span>
-                              <span className="text-[10px] text-gray-500 block mt-0.5 leading-snug font-mono uppercase">{EVENT_INFO.address.toUpperCase()}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2.5 text-xs border-t-2 border-[#2e5aa8] pt-2.5">
-                            <Icons.Utensils className="w-4 h-4 text-[#dd681f] shrink-0" />
-                            <div>
-                              <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">HOSPEDAGEM & ALIMENTAÇÃO</span>
-                              <span className="font-bold text-white block mt-0.5 uppercase tracking-wide">100% INCLUSO PARA OS 3 DIAS</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Core Highlights List */}
-                        <div className="space-y-2">
-                          <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block pl-1">
-                            O QUE ESTÁ INCLUSO:
-                          </span>
-                          <div className="grid grid-cols-1 gap-2">
-                            {EVENT_INFO.features.map((f, idx) => (
-                              <div key={idx} className="flex gap-2.5 p-2 bg-[#254b8c]/50 border-2 border-[#2e5aa8] rounded-none items-center">
-                                <div className="w-6 h-6 bg-neutral-900 flex items-center justify-center text-[#dd681f] shrink-0 border border-[#2e5aa8]">
-                                  <IconRenderer name={f.icon} className="w-3.5 h-3.5" />
-                                </div>
-                                <div>
-                                  <span className="text-xs font-black text-white block leading-none uppercase tracking-wide">{f.label.toUpperCase()}</span>
-                                  <span className="text-[9px] text-gray-500 block mt-1 uppercase tracking-wider font-mono">{f.description.toUpperCase()}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="pt-2 pb-4">
-                          <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setShowInscricaoForm(true)}
-                            className="w-full bg-[#dd681f] hover:bg-white hover:text-[#254b8c] text-white border-2 border-transparent hover:border-[#dd681f] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
-                          >
-                            QUERO ME INSCREVER
-                            <Icons.ChevronRight className="w-4 h-4" />
-                          </motion.button>
-                        </div>
+                      <div className="pt-1 pb-4">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => window.open(REGISTRATION_URL, '_blank')}
+                          className="w-full bg-[#25D366] hover:bg-white hover:text-[#128C7E] text-white border-2 border-transparent hover:border-[#25D366] font-black py-4 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 shadow-[0_0_20px_rgba(37,211,102,0.4)] animate-pulse"
+                        >
+                          <Icons.Sparkles className="w-4 h-4" />
+                          SIM, INSCREVER{' '}
+                          <AnimatePresence mode="wait">
+                            <motion.span
+                              key={isFeminine ? 'minhafilha_btn' : 'meufilho_btn'}
+                              initial={{ opacity: 0, y: 3 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -3 }}
+                              transition={{ duration: 0.2 }}
+                              className="inline-block"
+                            >
+                              {isFeminine ? 'MINHA FILHA!' : 'MEU FILHO!'}
+                            </motion.span>
+                          </AnimatePresence>
+                        </motion.button>
                       </div>
-                    )
+                    </div>
                   ) : (
-                    <RegistrationForm
-                      onSubmit={handleRegistrationSubmit}
-                      onBack={() => setShowInscricaoForm(false)}
-                    />
-                  )}
-                </motion.div>
-              )}
+                    <div className="p-5 space-y-4">
+                      {/* Logo and Event Details Summary */}
+                      <div className="text-center space-y-1">
+                        <span className="text-[#dd681f] text-[9px] font-black tracking-[0.3em] uppercase block">
+                          INFORMAÇÕES GERAIS
+                        </span>
+                        <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
+                          ACAMP'S WINTER
+                        </h2>
+                        <div className="inline-block bg-[#dd681f]/10 text-[#dd681f] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#dd681f]/15 tracking-widest uppercase mt-1">
+                          {EVENT_INFO.targetAge.toUpperCase()}
+                        </div>
+                      </div>
 
-              {/* STEP 6: DIGITAL TICKET PASS */}
-              {currentStep === 'ticket' && registration && (
-                <motion.div
-                  key="ticket"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex-1 flex flex-col justify-start relative h-full text-white overflow-y-auto no-scrollbar"
-                >
-                  <TicketPass registration={registration} onReset={handleReset} />
+                      {/* Info highlights card (Sharp Corners, stark borders) */}
+                      <div className="bg-[#254b8c] border-2 border-[#2e5aa8] rounded-none p-3.5 space-y-3.5">
+                        <div className="flex items-center gap-2.5 text-xs">
+                          <Icons.Calendar className="w-4 h-4 text-[#dd681f] shrink-0" />
+                          <div>
+                            <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">DATAS</span>
+                            <span className="font-bold text-white block mt-0.5 font-mono uppercase">{EVENT_INFO.dates.toUpperCase()}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-2.5 text-xs border-t-2 border-[#2e5aa8] pt-2.5">
+                          <Icons.MapPin className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
+                          <div>
+                            <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">LOCAL</span>
+                            <span className="font-bold text-white block mt-0.5 uppercase tracking-wide">{EVENT_INFO.location.toUpperCase()}</span>
+                            <span className="text-[10px] text-gray-500 block mt-0.5 leading-snug font-mono uppercase">{EVENT_INFO.address.toUpperCase()}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5 text-xs border-t-2 border-[#2e5aa8] pt-2.5">
+                          <Icons.Utensils className="w-4 h-4 text-[#dd681f] shrink-0" />
+                          <div>
+                            <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">HOSPEDAGEM & ALIMENTAÇÃO</span>
+                            <span className="font-bold text-white block mt-0.5 uppercase tracking-wide">100% INCLUSO PARA OS 3 DIAS</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Core Highlights List */}
+                      <div className="space-y-2">
+                        <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block pl-1">
+                          O QUE ESTÁ INCLUSO:
+                        </span>
+                        <div className="grid grid-cols-1 gap-2">
+                          {EVENT_INFO.features.map((f, idx) => (
+                            <div key={idx} className="flex gap-2.5 p-2 bg-[#254b8c]/50 border-2 border-[#2e5aa8] rounded-none items-center">
+                              <div className="w-6 h-6 bg-neutral-900 flex items-center justify-center text-[#dd681f] shrink-0 border border-[#2e5aa8]">
+                                <IconRenderer name={f.icon} className="w-3.5 h-3.5" />
+                              </div>
+                              <div>
+                                <span className="text-xs font-black text-white block leading-none uppercase tracking-wide">{f.label.toUpperCase()}</span>
+                                <span className="text-[9px] text-gray-500 block mt-1 uppercase tracking-wider font-mono">{f.description.toUpperCase()}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 pb-4">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => window.open(REGISTRATION_URL, '_blank')}
+                          className="w-full bg-[#dd681f] hover:bg-white hover:text-[#254b8c] text-white border-2 border-transparent hover:border-[#dd681f] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
+                        >
+                          QUERO ME INSCREVER
+                          <Icons.ChevronRight className="w-4 h-4" />
+                        </motion.button>
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
