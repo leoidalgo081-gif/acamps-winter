@@ -45,7 +45,7 @@ export const QUESTIONS: QuizQuestion[] = [
   {
     id: 5,
     text: 'Você conversa todos os dias com muitas pessoas. Mas quantas realmente conhecem você?',
-    image: 'https://images.unsplash.com/photo-1484712401471-05c7215a69eb?q=80&w=600',
+    image: '/conversas.png',
     options: [
       { text: 'Tenho amizades verdadeiras.', icon: 'Users' },
       { text: 'Tenho poucos amigos.', icon: 'Meh' },
