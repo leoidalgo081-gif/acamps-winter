@@ -263,6 +263,7 @@ const PriceSection = () => {
 export default function App() {
   const [currentStep, setCurrentStep] = useState<AppStep>('home');
   const [isMomsMode, setIsMomsMode] = useState(false);
+  const [isFeminine, setIsFeminine] = useState(false);
 
   useEffect(() => {
     const path = window.location.pathname.toLowerCase();
@@ -275,6 +276,14 @@ export default function App() {
       setIsMomsMode(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (!isMomsMode) return;
+    const interval = setInterval(() => {
+      setIsFeminine((prev) => !prev);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [isMomsMode]);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
@@ -514,7 +523,20 @@ export default function App() {
                       <p className="text-white text-[25px] leading-snug drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-black tracking-wide flex justify-center items-center gap-1.5 flex-wrap">
                         <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.1 }} className="transform -rotate-2 inline-block">MÃE...</motion.span>
                         <span className="w-full h-0 block"></span>
-                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.3 }} className="transform rotate-2 text-gray-300 inline-block uppercase">SEU FILHO</motion.span>
+                        <span className="text-gray-300 uppercase inline-block">
+                          <AnimatePresence mode="wait">
+                            <motion.span
+                              key={isFeminine ? 'suafilha' : 'seufilho'}
+                              initial={{ opacity: 0, y: 5 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -5 }}
+                              transition={{ duration: 0.25 }}
+                              className="inline-block"
+                            >
+                              {isFeminine ? 'SUA FILHA' : 'SEU FILHO'}
+                            </motion.span>
+                          </AnimatePresence>
+                        </span>
                         <span className="w-full h-0 block"></span>
                         <motion.span 
                           animate={{ rotate: [3, -1, 3], scale: [1.1, 1.15, 1.1] }} 
@@ -525,9 +547,40 @@ export default function App() {
                         </motion.span>
                       </p>
                       <div className="w-12 h-[2.5px] bg-gradient-to-r from-transparent via-[#dd681f]/80 to-transparent mx-auto rounded-full"></div>
-                      <p className="text-gray-200 text-[14px] leading-relaxed drop-shadow-[0_2px_5_rgba(0,0,0,0.9)] font-bold uppercase tracking-wider">
-                        Ajude seu filho a ter a <span className="text-[#dd681f] font-black">melhor experiência</span> de férias da vida dele!
-                      </p>
+                      <div className="text-gray-200 text-[14px] leading-relaxed drop-shadow-[0_2px_5_rgba(0,0,0,0.9)] font-bold uppercase tracking-wider flex justify-center items-center gap-1 flex-wrap">
+                        <span>AJUDE</span>
+                        <span className="inline-block text-white font-black bg-[#dd681f]/10 border border-[#dd681f]/20 px-1.5 py-0.5 rounded">
+                          <AnimatePresence mode="wait">
+                            <motion.span
+                              key={isFeminine ? 'suafilha_lbl' : 'seufilho_lbl'}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.2 }}
+                              className="inline-block"
+                            >
+                              {isFeminine ? 'SUA FILHA' : 'SEU FILHO'}
+                            </motion.span>
+                          </AnimatePresence>
+                        </span>
+                        <span>A TER A</span>
+                        <span className="text-[#dd681f] font-black">MELHOR EXPERIÊNCIA</span>
+                        <span>DE FÉRIAS DA VIDA</span>
+                        <span className="inline-block text-white font-black bg-[#dd681f]/10 border border-[#dd681f]/20 px-1.5 py-0.5 rounded">
+                          <AnimatePresence mode="wait">
+                            <motion.span
+                              key={isFeminine ? 'dela_lbl' : 'dele_lbl'}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              transition={{ duration: 0.2 }}
+                              className="inline-block font-mono"
+                            >
+                              {isFeminine ? 'DELA!' : 'DELE!'}
+                            </motion.span>
+                          </AnimatePresence>
+                        </span>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -941,8 +994,20 @@ export default function App() {
                   >
                     {isMomsMode ? (
                       <>
-                        QUERO LEVAR MEU FILHO
-                        <Icons.Heart className="w-4 h-4 fill-current" />
+                        QUERO LEVAR{' '}
+                        <AnimatePresence mode="wait">
+                          <motion.span
+                            key={isFeminine ? 'minhafilha_btn4' : 'meufilho_btn4'}
+                            initial={{ opacity: 0, y: 3 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -3 }}
+                            transition={{ duration: 0.2 }}
+                            className="inline-block"
+                          >
+                            {isFeminine ? 'MINHA FILHA' : 'MEU FILHO'}
+                          </motion.span>
+                        </AnimatePresence>
+                        <Icons.Heart className="w-4 h-4 fill-current ml-1.5" />
                       </>
                     ) : (
                       <>
@@ -1019,7 +1084,22 @@ export default function App() {
 
                         <div className="text-center py-1">
                           <p className="text-[12px] font-black text-white uppercase tracking-wide leading-tight">
-                            Gostaria de inscrever seu filho nesta experiência?
+                            Gostaria de inscrever{' '}
+                            <span className="inline-block font-black text-[#dd681f]">
+                              <AnimatePresence mode="wait">
+                                <motion.span
+                                  key={isFeminine ? 'suafilha_form' : 'seufilho_form'}
+                                  initial={{ opacity: 0, y: 3 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -3 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="inline-block"
+                                >
+                                  {isFeminine ? 'SUA FILHA' : 'SEU FILHO'}
+                                </motion.span>
+                              </AnimatePresence>
+                            </span>{' '}
+                            nesta experiência?
                           </p>
                         </div>
 
@@ -1031,7 +1111,19 @@ export default function App() {
                             className="w-full bg-[#25D366] hover:bg-white hover:text-[#128C7E] text-white border-2 border-transparent hover:border-[#25D366] font-black py-4 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 shadow-[0_0_20px_rgba(37,211,102,0.4)] animate-pulse"
                           >
                             <Icons.Sparkles className="w-4 h-4" />
-                            SIM, INSCREVER MEU FILHO!
+                            SIM, INSCREVER{' '}
+                            <AnimatePresence mode="wait">
+                              <motion.span
+                                key={isFeminine ? 'minhafilha_btn' : 'meufilho_btn'}
+                                initial={{ opacity: 0, y: 3 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -3 }}
+                                transition={{ duration: 0.2 }}
+                                className="inline-block"
+                              >
+                                {isFeminine ? 'MINHA FILHA!' : 'MEU FILHO!'}
+                              </motion.span>
+                            </AnimatePresence>
                           </motion.button>
                         </div>
                       </div>
