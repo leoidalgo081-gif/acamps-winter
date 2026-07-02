@@ -203,11 +203,22 @@ export default function App() {
   // Initialize audio on mount
   useEffect(() => {
     const audio = new Audio('/acampswinter.mp3');
-    audio.loop = true;
+    audio.loop = false; // Play first audio only once
     audio.volume = 0.15; // Soft background volume
     audioRef.current = audio;
 
+    const handleAudioEnded = () => {
+      if (audioRef.current) {
+        audioRef.current.src = '/acampswinter3.mp3';
+        audioRef.current.loop = true; // Second audio in loop
+        audioRef.current.play().catch((err) => console.log('Erro ao tocar áudio em loop:', err));
+      }
+    };
+
+    audio.addEventListener('ended', handleAudioEnded);
+
     return () => {
+      audio.removeEventListener('ended', handleAudioEnded);
       audio.pause();
     };
   }, []);
