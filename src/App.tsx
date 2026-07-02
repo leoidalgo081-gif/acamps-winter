@@ -214,11 +214,10 @@ const PriceSection = () => {
       <span className="text-[10px] text-gray-400 tracking-[0.2em] font-mono uppercase">TUDO ISSO POR APENAS:</span>
       
       <div className="flex items-center gap-4 mt-2">
-        {/* Original Price 280 */}
+        {/* Original Price 450 */}
         <div className="relative">
           <span className="text-gray-500 font-black text-xl font-mono relative flex flex-col items-center">
-            <span className="opacity-75">R$ 280,00</span>
-            <span className="text-[8px] text-gray-600 font-sans tracking-wide leading-none mt-0.5">+ R$ 19,32 taxa</span>
+            <span className="opacity-75">R$ 450,00</span>
             {isClipped && (
               <motion.div
                 initial={{ width: 0 }}
@@ -241,7 +240,7 @@ const PriceSection = () => {
           </motion.span>
         )}
 
-        {/* Special Price 260 */}
+        {/* Special Price 280 */}
         <div className="relative">
           <AnimatePresence>
             {isClipped && (
@@ -250,8 +249,8 @@ const PriceSection = () => {
                 animate={{ scale: [1.3, 1.0], opacity: 1 }}
                 className="text-white font-black text-3xl font-mono tracking-tighter flex flex-col items-center"
               >
-                <span className="text-[#25D366] drop-shadow-[0_0_15px_rgba(37,211,102,0.4)]">R$ 260,00</span>
-                <span className="text-[9px] text-[#25D366]/90 font-sans tracking-wider leading-none mt-1">+ R$ 17,94 TAXA</span>
+                <span className="text-[#25D366] drop-shadow-[0_0_15px_rgba(37,211,102,0.4)]">R$ 280,00</span>
+                <span className="text-[9px] text-[#25D366]/90 font-sans tracking-wider leading-none mt-1">+ R$ 19,32 TAXA</span>
                 <span className="text-[8px] text-[#25D366] tracking-widest font-sans font-black uppercase mt-1">PROMOÇÃO EXCLUSIVA</span>
               </motion.div>
             )}
@@ -270,8 +269,8 @@ const PriceSection = () => {
           <div className="flex flex-col gap-0.5 bg-[#254b8c]/40 p-2 border border-[#2e5aa8]/20">
             <span className="font-mono font-black text-white text-[9px]">💳 EM ATÉ 10X NO CARTÃO (com acréscimo)</span>
             <div className="flex justify-between items-center mt-1">
-              <span className="line-through text-gray-500 font-mono text-[9px]">R$ 280,00 (+ R$ 19,32 taxa)</span>
-              <span className="font-black text-[#25D366] font-mono text-[10.5px]">R$ 260,00 (+ R$ 17,94 taxa)</span>
+              <span className="line-through text-gray-500 font-mono text-[9px]">R$ 450,00</span>
+              <span className="font-black text-[#25D366] font-mono text-[10.5px]">R$ 280,00 (+ R$ 19,32 taxa)</span>
             </div>
           </div>
 
@@ -279,8 +278,8 @@ const PriceSection = () => {
           <div className="flex flex-col gap-0.5 bg-[#254b8c]/40 p-2 border border-[#2e5aa8]/20">
             <span className="font-mono font-black text-white text-[9px]">⚡ À VISTA VIA PIX</span>
             <div className="flex justify-between items-center mt-1">
-              <span className="line-through text-gray-500 font-mono text-[9px]">R$ 280,00 (+ R$ 19,32 taxa)</span>
-              <span className="font-black text-[#25D366] font-mono text-[10.5px]">R$ 260,00 (+ R$ 17,94 taxa)</span>
+              <span className="line-through text-gray-500 font-mono text-[9px]">R$ 450,00</span>
+              <span className="font-black text-[#25D366] font-mono text-[10.5px]">R$ 280,00 (+ R$ 19,32 taxa)</span>
             </div>
           </div>
 
@@ -288,8 +287,8 @@ const PriceSection = () => {
           <div className="flex flex-col gap-0.5 bg-[#254b8c]/40 p-2 border border-[#2e5aa8]/20">
             <span className="font-mono font-black text-white text-[9px]">📄 EM ATÉ 10X NO BOLETO</span>
             <div className="flex justify-between items-center mt-1">
-              <span className="line-through text-gray-500 font-mono text-[9px]">R$ 280,00 (+ R$ 19,32 taxa)</span>
-              <span className="font-black text-[#25D366] font-mono text-[10.5px]">R$ 260,00 (+ R$ 17,94 taxa)</span>
+              <span className="line-through text-gray-500 font-mono text-[9px]">R$ 450,00</span>
+              <span className="font-black text-[#25D366] font-mono text-[10.5px]">R$ 280,00 (+ R$ 19,32 taxa)</span>
             </div>
           </div>
         </motion.div>
@@ -1224,6 +1223,8 @@ export default function App() {
                           ))}
                         </div>
                       </div>
+
+                      <PriceSection />
 
                       <div className="pt-2 pb-4">
                         <motion.button
