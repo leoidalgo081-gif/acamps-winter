@@ -303,18 +303,83 @@ export default function App() {
   const [currentStep, setCurrentStep] = useState<AppStep>('home');
   const [isMomsMode, setIsMomsMode] = useState(false);
   const [isFeminine, setIsFeminine] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminStats, setAdminStats] = useState<{
+    visitsYouth: number;
+    visitsMoms: number;
+    clicksYouth: number;
+    clicksMoms: number;
+    clicksAskMom: number;
+  } | null>(null);
+  const [isAdminLoading, setIsAdminLoading] = useState(false);
+
+  const fetchAdminStats = async () => {
+    setIsAdminLoading(true);
+    try {
+      const getVal = async (key: string): Promise<number> => {
+        try {
+          const res = await fetch(`https://abacus.jasoncameron.dev/get/acampswintersp2026/${key}`);
+          const data = await res.json();
+          return data.value || 0;
+        } catch {
+          return 0;
+        }
+      };
+
+      const [visitsYouth, visitsMoms, clicksYouth, clicksMoms, clicksAskMom] = await Promise.all([
+        getVal('visits_youth'),
+        getVal('visits_moms'),
+        getVal('clicks_register_youth'),
+        getVal('clicks_register_moms'),
+        getVal('clicks_ask_mom')
+      ]);
+
+      setAdminStats({
+        visitsYouth,
+        visitsMoms,
+        clicksYouth,
+        clicksMoms,
+        clicksAskMom
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAdminLoading(false);
+    }
+  };
 
   useEffect(() => {
     const path = window.location.pathname.toLowerCase();
     const search = window.location.search.toLowerCase();
     const hash = window.location.hash.toLowerCase();
     
-    if (path.includes('mamaes') || path.includes('moms') || 
-        search.includes('mamaes') || search.includes('moms') || 
-        hash.includes('mamaes') || hash.includes('moms')) {
+    const isMoms = path.includes('mamaes') || path.includes('moms') || 
+                   search.includes('mamaes') || search.includes('moms') || 
+                   hash.includes('mamaes') || hash.includes('moms');
+    
+    const isSecretAdmin = path.includes('admin') || search.includes('admin') || hash.includes('admin');
+    
+    if (isMoms) {
       setIsMomsMode(true);
     }
+    
+    if (isSecretAdmin) {
+      setIsAdmin(true);
+    } else {
+      // Record visit only once per session
+      if (!sessionStorage.getItem('counted_visit')) {
+        sessionStorage.setItem('counted_visit', 'true');
+        const key = isMoms ? 'visits_moms' : 'visits_youth';
+        fetch(`https://abacus.jasoncameron.dev/hit/acampswintersp2026/${key}`).catch(() => {});
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAdminStats();
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     if (!isMomsMode) return;
@@ -487,9 +552,155 @@ export default function App() {
       {/* Center-aligned mobile-first container */}
       <div className="w-full max-w-md relative z-10 my-auto">
         <PhoneMockup>
-          {/* Floating speaker mute/unmute control inside cellphone */}
-          <button
-            onClick={toggleMusic}
+          {isAdmin ? (
+            <div className="flex-1 flex flex-col justify-start relative h-full text-white overflow-y-auto no-scrollbar p-5 space-y-4 text-left z-25">
+              {/* Header */}
+              <div className="text-center space-y-1">
+                <span className="text-[#25D366] text-[9px] font-black tracking-[0.3em] uppercase block">
+                  PAINEL DE ANÁLISE 📊
+                </span>
+                <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
+                  ADMINISTRADOR
+                </h2>
+                <div className="inline-block bg-[#25D366]/10 text-[#25D366] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#25D366]/15 tracking-widest uppercase mt-1">
+                  ESTATÍSTICAS EM TEMPO REAL
+                </div>
+              </div>
+
+              {/* Stats Card */}
+              {isAdminLoading || !adminStats ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-3">
+                  <div className="w-8 h-8 border-4 border-t-[#25D366] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+                  <span className="text-xs text-gray-400 uppercase tracking-widest font-mono">Carregando dados...</span>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Visitas */}
+                  <div className="bg-[#254b8c] border-2 border-[#2e5aa8] p-3.5 space-y-3">
+                    <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block">
+                      VISITAS ÚNICAS (ACESSOS)
+                    </span>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-[#1b3b73]/60 p-2.5 border border-[#2e5aa8]/40">
+                        <span className="text-gray-400 block text-[9px] uppercase tracking-wider font-mono">👦 JOVENS</span>
+                        <span className="text-lg font-black text-white font-mono mt-0.5 block">{adminStats.visitsYouth}</span>
+                      </div>
+                      <div className="bg-[#1b3b73]/60 p-2.5 border border-[#2e5aa8]/40">
+                        <span className="text-gray-400 block text-[9px] uppercase tracking-wider font-mono">👩 MÃES</span>
+                        <span className="text-lg font-black text-white font-mono mt-0.5 block">{adminStats.visitsMoms}</span>
+                      </div>
+                    </div>
+                    <div className="bg-[#122340] p-2.5 border border-[#2e5aa8]/40 flex justify-between items-center text-xs">
+                      <span className="text-gray-400 uppercase tracking-wider font-mono text-[9px]">🌍 TOTAL DE ACESSOS:</span>
+                      <span className="text-xl font-black text-white font-mono">{adminStats.visitsYouth + adminStats.visitsMoms}</span>
+                    </div>
+                  </div>
+
+                  {/* Cliques de Inscrição */}
+                  <div className="bg-[#254b8c] border-2 border-[#2e5aa8] p-3.5 space-y-3">
+                    <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block">
+                      CLIQUES EM "ME INSCREVER"
+                    </span>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="bg-[#1b3b73]/60 p-2.5 border border-[#2e5aa8]/40">
+                        <span className="text-gray-400 block text-[9px] uppercase tracking-wider font-mono">👦 JOVENS</span>
+                        <span className="text-lg font-black text-[#25D366] font-mono mt-0.5 block">{adminStats.clicksYouth}</span>
+                      </div>
+                      <div className="bg-[#1b3b73]/60 p-2.5 border border-[#2e5aa8]/40">
+                        <span className="text-gray-400 block text-[9px] uppercase tracking-wider font-mono">👩 MÃES</span>
+                        <span className="text-lg font-black text-[#25D366] font-mono mt-0.5 block">{adminStats.clicksMoms}</span>
+                      </div>
+                    </div>
+                    <div className="bg-[#122340] p-2.5 border border-[#2e5aa8]/40 flex justify-between items-center text-xs">
+                      <span className="text-gray-400 uppercase tracking-wider font-mono text-[9px]">⚡ TOTAL DE CLIQUES:</span>
+                      <span className="text-xl font-black text-[#25D366] font-mono">{adminStats.clicksYouth + adminStats.clicksMoms}</span>
+                    </div>
+                  </div>
+
+                  {/* Engajamento */}
+                  <div className="bg-[#254b8c] border-2 border-[#2e5aa8] p-3.5 space-y-2 text-xs">
+                    <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block">
+                      OUTRAS AÇÕES
+                    </span>
+                    <div className="bg-[#1b3b73]/60 p-2.5 border border-[#2e5aa8]/40 flex justify-between items-center">
+                      <div>
+                        <span className="text-white font-bold block uppercase tracking-wide text-[10px]">💬 PEDIR PARA A MÃE:</span>
+                        <span className="text-[8.5px] text-gray-400 block font-mono mt-0.5">CLIQUES NO BOTÃO DE WHATSAPP DO JOVEM</span>
+                      </div>
+                      <span className="text-lg font-black text-white font-mono">{adminStats.clicksAskMom}</span>
+                    </div>
+                  </div>
+
+                  {/* Conversão */}
+                  <div className="bg-[#254b8c] border-2 border-[#2e5aa8] p-3.5 space-y-3 text-xs">
+                    <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block">
+                      TAXAS DE CONVERSÃO 📈
+                    </span>
+                    
+                    {/* Jovens conversion */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-[9px] font-mono uppercase text-gray-300">
+                        <span>👦 CONVERSÃO JOVENS</span>
+                        <span className="font-bold text-white">
+                          {adminStats.visitsYouth > 0 ? ((adminStats.clicksYouth / adminStats.visitsYouth) * 100).toFixed(1) : '0.0'}%
+                        </span>
+                      </div>
+                      <div className="h-2 bg-[#1b3b73] border border-[#2e5aa8]/40">
+                        <div
+                          className="h-full bg-[#dd681f]"
+                          style={{ width: `${Math.min(100, adminStats.visitsYouth > 0 ? (adminStats.clicksYouth / adminStats.visitsYouth) * 100 : 0)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Mães conversion */}
+                    <div className="space-y-1 pt-1">
+                      <div className="flex justify-between text-[9px] font-mono uppercase text-gray-300">
+                        <span>👩 CONVERSÃO MÃES</span>
+                        <span className="font-bold text-white">
+                          {adminStats.visitsMoms > 0 ? ((adminStats.clicksMoms / adminStats.visitsMoms) * 100).toFixed(1) : '0.0'}%
+                        </span>
+                      </div>
+                      <div className="h-2 bg-[#1b3b73] border border-[#2e5aa8]/40">
+                        <div
+                          className="h-full bg-[#25D366]"
+                          style={{ width: `${Math.min(100, adminStats.visitsMoms > 0 ? (adminStats.clicksMoms / adminStats.visitsMoms) * 100 : 0)}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-2 pt-2 pb-4">
+                <button
+                  onClick={fetchAdminStats}
+                  disabled={isAdminLoading}
+                  className="w-full bg-[#25D366] hover:bg-[#1ebd59] text-white py-3 px-4 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
+                >
+                  <Icons.RefreshCw className={`w-4 h-4 ${isAdminLoading ? 'animate-spin' : ''}`} />
+                  ATUALIZAR DADOS
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsAdmin(false);
+                    window.history.pushState({}, '', '/');
+                    setCurrentStep('home');
+                  }}
+                  className="w-full bg-[#1b3b73] hover:bg-[#2e5aa8] border border-[#2e5aa8] text-white py-2.5 px-4 font-black text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
+                >
+                  <Icons.X className="w-4 h-4" />
+                  FECHAR PAINEL DE ADMIN
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Floating speaker mute/unmute control inside cellphone */}
+              <button
+                onClick={toggleMusic}
             className="absolute top-12 right-4 z-50 p-2.5 bg-[#254b8c]/50 border border-[#2e5aa8]/40 text-white rounded-full hover:bg-[#dd681f] transition-all cursor-pointer shadow-[0_0_10px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95 flex items-center gap-1.5 overflow-hidden"
             title={isMusicPlaying ? 'Mutar Música' : 'Tocar Música'}
           >
@@ -1288,7 +1499,10 @@ export default function App() {
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          onClick={() => window.open(REGISTRATION_URL, '_blank')}
+                          onClick={() => {
+                            fetch('https://abacus.jasoncameron.dev/hit/acampswintersp2026/clicks_register_moms').catch(() => {});
+                            window.open(REGISTRATION_URL, '_blank');
+                          }}
                           className="w-full bg-[#25D366] hover:bg-white hover:text-[#128C7E] text-white border-2 border-transparent hover:border-[#25D366] font-black py-4 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 shadow-[0_0_20px_rgba(37,211,102,0.4)] animate-pulse"
                         >
                           <Icons.Sparkles className="w-4 h-4" />
@@ -1377,7 +1591,10 @@ export default function App() {
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          onClick={() => window.open(REGISTRATION_URL, '_blank')}
+                          onClick={() => {
+                            fetch('https://abacus.jasoncameron.dev/hit/acampswintersp2026/clicks_register_youth').catch(() => {});
+                            window.open(REGISTRATION_URL, '_blank');
+                          }}
                           className="w-full bg-[#dd681f] hover:bg-white hover:text-[#254b8c] text-white border-2 border-transparent hover:border-[#dd681f] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
                         >
                           QUERO ME INSCREVER
@@ -1387,7 +1604,10 @@ export default function App() {
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          onClick={() => setCurrentStep('convince_mom')}
+                          onClick={() => {
+                            fetch('https://abacus.jasoncameron.dev/hit/acampswintersp2026/clicks_ask_mom').catch(() => {});
+                            setCurrentStep('convince_mom');
+                          }}
                           className="w-full bg-[#25D366] hover:bg-white hover:text-[#128C7E] text-white border-2 border-transparent hover:border-[#25D366] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 shadow-[0_0_15px_rgba(37,211,102,0.3)] animate-pulse"
                         >
                           <Icons.MessageCircle className="w-4.5 h-4.5 fill-current" />
@@ -1400,6 +1620,8 @@ export default function App() {
               )}
 
             </AnimatePresence>
+          </>
+          )}
           </PhoneMockup>
         </div>
     </div>
