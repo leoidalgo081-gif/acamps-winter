@@ -24,11 +24,11 @@ export interface RegistrationData {
   fullName: string;
   email: string;
   phone: string;
-  age: number;
-  rg: string;
-  parentName: string;
-  parentPhone: string;
-  foodRestriction: string;
+  age?: number;
+  rg?: string;
+  parentName?: string;
+  parentPhone?: string;
+  foodRestriction?: string;
   ticketCode: string;
   registrationDate: string;
   status: 'pending' | 'confirmed';
