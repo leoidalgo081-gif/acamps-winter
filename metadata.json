@@ -1,0 +1,6 @@
+{
+  "name": "Acamp's Winter",
+  "description": "Aplicativo interativo com questionário emocional e inscrição com ingresso digital para o Acamp's Winter.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
