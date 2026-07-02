@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as Icons from 'lucide-react';
 import { AppStep, QuizQuestion, RegistrationData } from './types';
@@ -197,6 +197,39 @@ export default function App() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
   const [showInscricaoForm, setShowInscricaoForm] = useState(false);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio on mount
+  useEffect(() => {
+    const audio = new Audio('/acampswinter.mp3');
+    audio.loop = true;
+    audio.volume = 0.15; // Soft background volume
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+    };
+  }, []);
+
+  const toggleMusic = () => {
+    if (!audioRef.current) return;
+    if (isMusicPlaying) {
+      audioRef.current.pause();
+      setIsMusicPlaying(false);
+    } else {
+      audioRef.current.play().catch((err) => console.log('Erro ao tocar áudio:', err));
+      setIsMusicPlaying(true);
+    }
+  };
+
+  const startMusicOnInteract = () => {
+    if (audioRef.current && !isMusicPlaying) {
+      audioRef.current.play()
+        .then(() => setIsMusicPlaying(true))
+        .catch((err) => console.log('Autoplay bloqueado pelo navegador:', err));
+    }
+  };
 
   // Load existing registration from localStorage on mount
   useEffect(() => {
@@ -257,6 +290,19 @@ export default function App() {
       {/* Center-aligned mobile-first container */}
       <div className="w-full max-w-md relative z-10 my-auto">
         <PhoneMockup>
+          {/* Floating speaker mute/unmute control inside cellphone */}
+          <button
+            onClick={toggleMusic}
+            className="absolute top-12 right-4 z-50 p-2 bg-[#254b8c]/50 border border-[#2e5aa8]/40 text-white rounded-full hover:bg-[#dd681f] transition-all cursor-pointer shadow-[0_0_10px_rgba(0,0,0,0.3)] hover:scale-105 active:scale-95"
+            title={isMusicPlaying ? 'Mutar Música' : 'Tocar Música'}
+          >
+            {isMusicPlaying ? (
+              <Icons.Volume2 className="w-3.5 h-3.5 animate-pulse text-[#dd681f]" />
+            ) : (
+              <Icons.VolumeX className="w-3.5 h-3.5 text-gray-400" />
+            )}
+          </button>
+
           <AnimatePresence mode="wait">
             
             {/* STEP 1: HOME */}
@@ -328,7 +374,10 @@ export default function App() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setCurrentStep('quiz')}
+                    onClick={() => {
+                      startMusicOnInteract();
+                      setCurrentStep('quiz');
+                    }}
                     className="w-full bg-[#dd681f] text-white font-black text-[15px] py-4 px-6 rounded-2xl tracking-[0.2em] uppercase transition-all duration-300 shadow-[0_0_20px_rgba(221,104,31,0.6)] hover:shadow-[0_0_35px_rgba(221,104,31,0.9)] border border-[#dd681f]/50 cursor-pointer"
                   >
                     COMEÇAR
