@@ -107,3 +107,38 @@ export const EVENT_INFO = {
   ],
   website: 'acamps.com.br/inscricao',
 };
+
+export const MOMS_QUESTIONS: QuizQuestion[] = [
+  {
+    id: 1,
+    text: 'Como mãe, qual é o seu maior desafio com seu filho durante as férias escolares?',
+    image: 'https://images.unsplash.com/photo-1588072432836-e10032774350?q=80&w=600',
+    options: [
+      { text: 'Celular e telas o dia inteiro', icon: 'Smartphone' },
+      { text: 'Falta de atividades produtivas', icon: 'BookOpen' },
+      { text: 'Pouca convivência com amigos saudáveis', icon: 'Users' },
+      { text: 'Todas as alternativas juntas!', icon: 'AlertCircle' },
+    ],
+  },
+  {
+    id: 2,
+    text: 'Já imaginou a paz de ter um final de semana sabendo que ele está seguro, fazendo novos amigos e tendo uma experiência marcante?',
+    image: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=600',
+    options: [
+      { text: 'Seria maravilhoso para nós dois!', icon: 'Smile' },
+      { text: 'Tenho receio de deixá-lo ir sozinho', icon: 'ShieldAlert' },
+      { text: 'Quero saber mais sobre os alojamentos', icon: 'Home' },
+    ],
+  },
+  {
+    id: 3,
+    text: 'Qual item você considera o mais importante para a segurança e conforto do seu filho?',
+    image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=600',
+    options: [
+      { text: 'Alojamentos com quartos separados por gênero', icon: 'Home' },
+      { text: 'Alimentação completa (5 refeições/dia)', icon: 'Utensils' },
+      { text: 'Equipe de monitores e segurança 24h', icon: 'ShieldCheck' },
+      { text: 'Todos esses itens inclusos!', icon: 'Sparkles' },
+    ],
+  },
+];

@@ -31,14 +31,30 @@ export default function TicketPass({ registration, onReset }: TicketPassProps) {
   };
 
   const handleSendWhatsApp = () => {
-    const message = `Olá! Realizei minha inscrição para o *Acamp's Winter SP*! ⛺️❄️
+    const isMoms = window.location.pathname.includes('mamaes') || 
+                    window.location.search.includes('mamaes') || 
+                    window.location.hash.includes('mamaes') || 
+                    window.location.pathname.includes('moms') || 
+                    window.location.search.includes('moms') || 
+                    window.location.hash.includes('moms');
+
+    const message = isMoms
+      ? `Olá! Sou mãe/responsável e gostaria de confirmar a vaga do meu filho no *Acamp's Winter SP*! ⛺️❄️
+
+*Dados de Contato:*
+👤 *Responsável:* ${registration.fullName.toUpperCase()}
+📧 *E-mail:* ${registration.email}
+📞 *Celular:* ${registration.phone}
+🧬 *Padroeiro do Ingresso:* ${chosenPatron.name}
+🎟️ *Código da Reserva:* ${registration.ticketCode}
+
+Por favor, me confirme os próximos passos de pagamento da taxa promocional de R$ 250! Obrigado!`
+      : `Olá! Realizei minha inscrição para o *Acamp's Winter SP*! ⛺️❄️
 
 *Dados da Inscrição:*
 👤 *Nome:* ${registration.fullName.toUpperCase()}
 📧 *E-mail:* ${registration.email}
-📞 *Celular:* ${registration.phoneNumber}
-🎂 *Idade:* ${registration.age} anos
-🪪 *RG:* ${registration.rg}
+📞 *Celular:* ${registration.phone}
 🧬 *Perfil/Padroeiro:* ${chosenPatron.name} (${chosenPatron.nickname})
 🎟️ *Código do Ingresso:* ${registration.ticketCode}
 

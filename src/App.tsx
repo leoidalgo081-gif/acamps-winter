@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as Icons from 'lucide-react';
 import { AppStep, QuizQuestion, RegistrationData } from './types';
-import { QUESTIONS, IMAGINE_SWAPS, REVELATION_COLLAGE, EVENT_INFO } from './data';
+import { QUESTIONS, IMAGINE_SWAPS, REVELATION_COLLAGE, EVENT_INFO, MOMS_QUESTIONS } from './data';
 import PhoneMockup from './components/PhoneMockup';
 import RegistrationForm from './components/RegistrationForm';
 import TicketPass from './components/TicketPass';
@@ -191,8 +191,90 @@ const TitleAnimator = ({ text, className, delayOffset = 0 }: { text: string; cla
   );
 };
 
+const MOMS_SWAPS = [
+  { text: 'Aventura radical com 100% de segurança e credibilidade.', icon: 'ShieldAlert' },
+  { text: 'Celulares e telas trocados por amizades reais e saudáveis.', icon: 'Smartphone' },
+  { text: 'Alojamentos confortáveis com quartos separados por gênero.', icon: 'Home' },
+  { text: 'Alimentação completa inclusa de altíssimo nível (5 refeições/dia).', icon: 'Utensils' },
+  { text: 'Um encontro pessoal transformador com o Amor de Deus.', icon: 'Flame' },
+];
+
+const PriceSection = () => {
+  const [isClipped, setIsClipped] = useState(false);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsClipped(true);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center p-4 bg-[#2e5aa8]/30 border-2 border-dashed border-[#dd681f]/40 rounded-2xl relative overflow-hidden my-3 w-full">
+      <span className="text-[10px] text-gray-400 tracking-[0.2em] font-mono uppercase">TUDO ISSO POR:</span>
+      
+      <div className="flex items-center gap-4 mt-2">
+        {/* Original Price 400 */}
+        <div className="relative">
+          <span className="text-gray-500 font-black text-2xl font-mono relative">
+            R$ 400
+            {isClipped && (
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "110%" }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="absolute top-1/2 -left-1 w-full h-[3px] bg-red-600 -rotate-12"
+              />
+            )}
+          </span>
+        </div>
+
+        {/* Arrow icon */}
+        {isClipped && (
+          <motion.span
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-[#dd681f] font-black text-xl"
+          >
+            ➔
+          </motion.span>
+        )}
+
+        {/* Special Price 250 */}
+        <div className="relative">
+          <AnimatePresence>
+            {isClipped && (
+              <motion.div
+                initial={{ scale: 0.3, opacity: 0 }}
+                animate={{ scale: [1.3, 1.0], opacity: 1 }}
+                className="text-white font-black text-4xl font-mono tracking-tighter flex flex-col items-center"
+              >
+                <span className="text-[#25D366] drop-shadow-[0_0_15px_rgba(37,211,102,0.4)]">R$ 250</span>
+                <span className="text-[9px] text-[#25D366] tracking-widest font-sans font-black uppercase mt-0.5">PREÇO ESPECIAL</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function App() {
   const [currentStep, setCurrentStep] = useState<AppStep>('home');
+  const [isMomsMode, setIsMomsMode] = useState(false);
+
+  useEffect(() => {
+    const path = window.location.pathname.toLowerCase();
+    const search = window.location.search.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    
+    if (path.includes('mamaes') || path.includes('moms') || 
+        search.includes('mamaes') || search.includes('moms') || 
+        hash.includes('mamaes') || hash.includes('moms')) {
+      setIsMomsMode(true);
+    }
+  }, []);
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
   const [registration, setRegistration] = useState<RegistrationData | null>(null);
@@ -294,12 +376,15 @@ export default function App() {
     }
   }, []);
 
+  // Select active question list based on mode
+  const questionsList = isMomsMode ? MOMS_QUESTIONS : QUESTIONS;
+
   // Handler for answer selection
   const handleSelectAnswer = (questionId: number, answerText: string, isDifferent?: boolean) => {
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: answerText }));
 
     // Proceed to next step
-    if (currentQuestionIdx < QUESTIONS.length - 1) {
+    if (currentQuestionIdx < questionsList.length - 1) {
       // Trigger smooth slider transition to next question
       setTimeout(() => {
         setCurrentQuestionIdx((prev) => prev + 1);
@@ -339,7 +424,7 @@ export default function App() {
     setShowInscricaoForm(false);
   };
 
-  const activeQuestion = QUESTIONS[currentQuestionIdx];
+  const activeQuestion = questionsList[currentQuestionIdx];
 
   return (
     <div className="min-h-screen bg-[#254b8c] md:bg-[#254b8c] flex flex-col items-center justify-start md:justify-center p-0 md:py-8 overflow-x-hidden relative font-sans">
@@ -424,40 +509,64 @@ export default function App() {
                   transition={{ duration: 0.6, ease: "easeInOut" }}
                   className="w-full max-w-[300px] mx-auto space-y-4 text-center px-2 py-1 relative z-10"
                 >
-                  <p className="text-white text-[21px] leading-snug drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-bold tracking-wide flex justify-center items-center gap-1.5 flex-wrap">
-                    <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.1 }} className="transform -rotate-2 inline-block">Não</motion.span>
-                    <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.3 }} className="transform rotate-2 text-gray-300 inline-block">existem</motion.span>
-                    <span className="w-full h-0 block"></span>
-                    <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.5 }} className="transform -rotate-1 inline-block">respostas</motion.span>
-                    <motion.span 
-                      animate={{ rotate: [3, -1, 3], scale: [1.1, 1.15, 1.1] }} 
-                      transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }} 
-                      className="text-[#dd681f] font-black drop-shadow-[0_0_10px_rgba(221,104,31,0.5)] ml-0.5 inline-block text-[25px]"
-                    >
-                      certas.
-                    </motion.span>
-                  </p>
-                  <div className="w-12 h-[2.5px] bg-gradient-to-r from-transparent via-[#dd681f]/80 to-transparent mx-auto rounded-full"></div>
-                  <p className="text-gray-200 text-[16px] leading-relaxed drop-shadow-[0_2px_5_rgba(0,0,0,0.9)] font-medium flex justify-center items-center gap-0.5 flex-wrap">
-                    <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 0.2 }} className="transform rotate-1 inline-block">Apenas</motion.span>
-                    <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 0.4 }} className="transform -rotate-2 inline-block">responda</motion.span>
-                    <motion.span animate={{ y: [0, -1, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 0.6 }} className="transform rotate-1 text-[#dd681f] inline-block">o que</motion.span>
-                    <span className="w-full h-0 block"></span>
-                    <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 0.8 }} className="transform -rotate-1 inline-block">realmente</motion.span>
-                    <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 1.0 }} className="transform rotate-2 inline-block">está no</motion.span>
-                    <span className="w-full h-0 block mt-0.5"></span>
-                    <motion.span 
-                      animate={{ 
-                        scale: [1.05, 1.1, 1.05],
-                        rotate: [-3, -1, -3],
-                        filter: ["drop-shadow(0 0 4px rgba(255,255,255,0.2))", "drop-shadow(0 0 10px rgba(255,255,255,0.5))", "drop-shadow(0 0 4px rgba(255,255,255,0.2))"]
-                      }} 
-                      transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                      className="text-white font-black italic tracking-widest text-[25px] mt-1 inline-block"
-                    >
-                      SEU CORAÇÃO
-                    </motion.span>
-                  </p>
+                  {isMomsMode ? (
+                    <>
+                      <p className="text-white text-[25px] leading-snug drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-black tracking-wide flex justify-center items-center gap-1.5 flex-wrap">
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.1 }} className="transform -rotate-2 inline-block">MÃE...</motion.span>
+                        <span className="w-full h-0 block"></span>
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.3 }} className="transform rotate-2 text-gray-300 inline-block uppercase">SEU FILHO</motion.span>
+                        <span className="w-full h-0 block"></span>
+                        <motion.span 
+                          animate={{ rotate: [3, -1, 3], scale: [1.1, 1.15, 1.1] }} 
+                          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }} 
+                          className="text-[#dd681f] font-black drop-shadow-[0_0_10px_rgba(221,104,31,0.5)] ml-0.5 inline-block text-[32px] uppercase"
+                        >
+                          QUER IR!
+                        </motion.span>
+                      </p>
+                      <div className="w-12 h-[2.5px] bg-gradient-to-r from-transparent via-[#dd681f]/80 to-transparent mx-auto rounded-full"></div>
+                      <p className="text-gray-200 text-[14px] leading-relaxed drop-shadow-[0_2px_5_rgba(0,0,0,0.9)] font-bold uppercase tracking-wider">
+                        Ajude seu filho a ter a <span className="text-[#dd681f] font-black">melhor experiência</span> de férias da vida dele!
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-white text-[21px] leading-snug drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-bold tracking-wide flex justify-center items-center gap-1.5 flex-wrap">
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.1 }} className="transform -rotate-2 inline-block">Não</motion.span>
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.3 }} className="transform rotate-2 text-gray-300 inline-block">existem</motion.span>
+                        <span className="w-full h-0 block"></span>
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut", delay: 0.5 }} className="transform -rotate-1 inline-block">respostas</motion.span>
+                        <motion.span 
+                          animate={{ rotate: [3, -1, 3], scale: [1.1, 1.15, 1.1] }} 
+                          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }} 
+                          className="text-[#dd681f] font-black drop-shadow-[0_0_10px_rgba(221,104,31,0.5)] ml-0.5 inline-block text-[25px]"
+                        >
+                          certas.
+                        </motion.span>
+                      </p>
+                      <div className="w-12 h-[2.5px] bg-gradient-to-r from-transparent via-[#dd681f]/80 to-transparent mx-auto rounded-full"></div>
+                      <p className="text-gray-200 text-[16px] leading-relaxed drop-shadow-[0_2px_5_rgba(0,0,0,0.9)] font-medium flex justify-center items-center gap-0.5 flex-wrap">
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 0.2 }} className="transform rotate-1 inline-block">Apenas</motion.span>
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 0.4 }} className="transform -rotate-2 inline-block">responda</motion.span>
+                        <motion.span animate={{ y: [0, -1, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 0.6 }} className="transform rotate-1 text-[#dd681f] inline-block">o que</motion.span>
+                        <span className="w-full h-0 block"></span>
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 0.8 }} className="transform -rotate-1 inline-block">realmente</motion.span>
+                        <motion.span animate={{ y: [0, -2, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut", delay: 1.0 }} className="transform rotate-2 inline-block">está no</motion.span>
+                        <span className="w-full h-0 block mt-0.5"></span>
+                        <motion.span 
+                          animate={{ 
+                            scale: [1.05, 1.1, 1.05],
+                            rotate: [-3, -1, -3],
+                            filter: ["drop-shadow(0 0 4px rgba(255,255,255,0.2))", "drop-shadow(0 0 10px rgba(255,255,255,0.5))", "drop-shadow(0 0 4px rgba(255,255,255,0.2))"]
+                          }} 
+                          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                          className="text-white font-black italic tracking-widest text-[25px] mt-1 inline-block"
+                        >
+                          SEU CORAÇÃO
+                        </motion.span>
+                      </p>
+                    </>
+                  )}
                 </motion.div>
  
                 {/* 3. Tent Icon & Button (Bottom) */}
@@ -518,7 +627,7 @@ export default function App() {
                   {/* Question Header & ID */}
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-[#dd681f] font-black tracking-[0.25em] uppercase">
-                      PERGUNTA {activeQuestion.id} / {QUESTIONS.length}
+                      PERGUNTA {activeQuestion.id} / {questionsList.length}
                     </span>
                     {currentQuestionIdx > 0 && (
                       <button
@@ -594,12 +703,12 @@ export default function App() {
                   <div className="pt-4 pb-1 space-y-1.5">
                     <div className="flex justify-between items-center text-[9px] text-gray-500 font-mono tracking-widest uppercase font-black">
                       <span>PROGRESSO</span>
-                      <span>{activeQuestion.id} / {QUESTIONS.length}</span>
+                      <span>{activeQuestion.id} / {questionsList.length}</span>
                     </div>
                     <div className="w-full bg-[#2e5aa8] h-2 rounded-none overflow-hidden border border-[#222]">
                       <div
                         className="bg-[#dd681f] h-full transition-all duration-300"
-                        style={{ width: `${(activeQuestion.id / QUESTIONS.length) * 100}%` }}
+                        style={{ width: `${(activeQuestion.id / questionsList.length) * 100}%` }}
                       ></div>
                     </div>
                   </div>
@@ -636,16 +745,16 @@ export default function App() {
                   <div className="space-y-4">
                     <div className="text-center">
                       <span className="text-[#dd681f] text-[10px] font-black tracking-[0.25em] uppercase block">
-                        REVELAÇÃO INTERATIVA
+                        {isMomsMode ? 'MENSAGEM PARA AS MAMÃES' : 'REVELAÇÃO INTERATIVA'}
                       </span>
                       <h2 className="text-xl font-black uppercase tracking-tighter text-white mt-1">
-                        Imagine Trocar...
+                        {isMomsMode ? 'MANHEEEEE, EU QUERO IR!' : 'Imagine Trocar...'}
                       </h2>
                     </div>
 
                     {/* Swaps list rendered with motion delays */}
                     <div className="space-y-3 pt-2">
-                      {IMAGINE_SWAPS.map((swap, index) => {
+                      {(isMomsMode ? MOMS_SWAPS : IMAGINE_SWAPS).map((swap, index) => {
                         const isEven = index % 2 === 0;
                         return (
                           <motion.div
@@ -680,7 +789,7 @@ export default function App() {
                       onClick={() => setCurrentStep('revelation_collage')}
                       className="w-full bg-[#dd681f] hover:bg-white hover:text-[#254b8c] text-white border-2 border-transparent hover:border-[#dd681f] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
                     >
-                      DESCOBRIR COMO
+                      {isMomsMode ? 'VER DETALHES DO ACAMPAMENTO' : 'DESCOBRIR COMO'}
                       <Icons.ChevronRight className="w-4 h-4" />
                     </motion.button>
                   </div>
@@ -828,80 +937,152 @@ export default function App() {
                   className="flex-1 flex flex-col justify-start relative h-full text-white overflow-y-auto no-scrollbar"
                 >
                   {!showInscricaoForm ? (
-                    <div className="p-5 space-y-4">
-                      {/* Logo and Event Details Summary */}
-                      <div className="text-center space-y-1">
-                        <span className="text-[#dd681f] text-[9px] font-black tracking-[0.3em] uppercase block">
-                          INFORMAÇÕES GERAIS
-                        </span>
-                        <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
-                          ACAMP'S WINTER
-                        </h2>
-                        <div className="inline-block bg-[#dd681f]/10 text-[#dd681f] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#dd681f]/15 tracking-widest uppercase mt-1">
-                          {EVENT_INFO.targetAge.toUpperCase()}
-                        </div>
-                      </div>
-
-                      {/* Info highlights card (Sharp Corners, stark borders) */}
-                      <div className="bg-[#254b8c] border-2 border-[#2e5aa8] rounded-none p-3.5 space-y-3.5">
-                        <div className="flex items-center gap-2.5 text-xs">
-                          <Icons.Calendar className="w-4 h-4 text-[#dd681f] shrink-0" />
-                          <div>
-                            <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">DATAS</span>
-                            <span className="font-bold text-white block mt-0.5 font-mono uppercase">{EVENT_INFO.dates.toUpperCase()}</span>
+                    isMomsMode ? (
+                      <div className="p-5 space-y-4">
+                        {/* Logo and Event Details Summary */}
+                        <div className="text-center space-y-1">
+                          <span className="text-[#dd681f] text-[9px] font-black tracking-[0.3em] uppercase block">
+                            PROPOSTA PARA MAMÃES
+                          </span>
+                          <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
+                            ACAMP'S WINTER SP
+                          </h2>
+                          <div className="inline-block bg-[#dd681f]/10 text-[#dd681f] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#dd681f]/15 tracking-widest uppercase mt-1">
+                            A ESTRUTURA MAIS SEGURA PARA SEU FILHO
                           </div>
                         </div>
 
-                        <div className="flex items-start gap-2.5 text-xs border-t-2 border-[#2e5aa8] pt-2.5">
-                          <Icons.MapPin className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
-                          <div>
-                            <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">LOCAL</span>
-                            <span className="font-bold text-white block mt-0.5 uppercase tracking-wide">{EVENT_INFO.location.toUpperCase()}</span>
-                            <span className="text-[10px] text-gray-500 block mt-0.5 leading-snug font-mono uppercase">{EVENT_INFO.address.toUpperCase()}</span>
+                        {/* Info highlights card */}
+                        <div className="bg-[#254b8c] border-2 border-[#2e5aa8] rounded-none p-3.5 space-y-3.5 leading-relaxed text-[11px] text-gray-200">
+                          <div className="flex items-start gap-2.5">
+                            <Icons.Shield className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="text-white block uppercase tracking-wide">QUARTOS E MORADIA SEGURA:</strong>
+                              Alojamentos confortáveis com quartos 100% separados por gênero e segurança monitorada por monitores responsáveis 24h por dia.
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="flex items-center gap-2.5 text-xs border-t-2 border-[#2e5aa8] pt-2.5">
-                          <Icons.Utensils className="w-4 h-4 text-[#dd681f] shrink-0" />
-                          <div>
-                            <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">HOSPEDAGEM & ALIMENTAÇÃO</span>
-                            <span className="font-bold text-white block mt-0.5 uppercase tracking-wide">100% INCLUSO PARA OS 3 DIAS</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Core Highlights List */}
-                      <div className="space-y-2">
-                        <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block pl-1">
-                          O QUE ESTÁ INCLUSO:
-                        </span>
-                        <div className="grid grid-cols-1 gap-2">
-                          {EVENT_INFO.features.map((f, idx) => (
-                            <div key={idx} className="flex gap-2.5 p-2 bg-[#254b8c]/50 border-2 border-[#2e5aa8] rounded-none items-center">
-                              <div className="w-6 h-6 bg-neutral-900 flex items-center justify-center text-[#dd681f] shrink-0 border border-[#2e5aa8]">
-                                <IconRenderer name={f.icon} className="w-3.5 h-3.5" />
-                              </div>
-                              <div>
-                                <span className="text-xs font-black text-white block leading-none uppercase tracking-wide">{f.label.toUpperCase()}</span>
-                                <span className="text-[9px] text-gray-500 block mt-1 uppercase tracking-wider font-mono">{f.description.toUpperCase()}</span>
+                          <div className="flex items-start gap-2.5 border-t-2 border-[#2e5aa8] pt-2.5">
+                            <Icons.Utensils className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="text-white block uppercase tracking-wide">ALIMENTAÇÃO COMPLETA (5 REFEIÇÕES/DIA):</strong>
+                              Cardápio delicioso preparado com carinho para os 3 dias inclusos:
+                              <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-2 text-[10px] font-mono text-gray-400 uppercase tracking-wider pl-1">
+                                <span>🍳 CAFÉ DA MANHÃ</span>
+                                <span>🍲 ALMOÇO</span>
+                                <span>🍰 LANCHE DA TARDE</span>
+                                <span>🍕 JANTAR</span>
+                                <span className="col-span-2">🥪 LANCHE DA NOITE</span>
                               </div>
                             </div>
-                          ))}
+                          </div>
+
+                          <div className="flex items-start gap-2.5 border-t-2 border-[#2e5aa8] pt-2.5">
+                            <Icons.Award className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="text-white block uppercase tracking-wide">CREDIBILIDADE COMPROVADA:</strong>
+                              A Comunidade Shalom é reconhecida nacionalmente com mais de 40 anos de experiência na formação de jovens em convivência comunitária, brincadeiras e espiritualidade com Deus.
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Animated Price Countdown */}
+                        <PriceSection />
+
+                        <div className="text-center py-1">
+                          <p className="text-[12px] font-black text-white uppercase tracking-wide leading-tight">
+                            Gostaria de inscrever seu filho nesta experiência?
+                          </p>
+                        </div>
+
+                        <div className="pt-1 pb-4">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setShowInscricaoForm(true)}
+                            className="w-full bg-[#25D366] hover:bg-white hover:text-[#128C7E] text-white border-2 border-transparent hover:border-[#25D366] font-black py-4 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300 shadow-[0_0_20px_rgba(37,211,102,0.4)] animate-pulse"
+                          >
+                            <Icons.Sparkles className="w-4 h-4" />
+                            SIM, INSCREVER MEU FILHO!
+                          </motion.button>
                         </div>
                       </div>
+                    ) : (
+                      <div className="p-5 space-y-4">
+                        {/* Logo and Event Details Summary */}
+                        <div className="text-center space-y-1">
+                          <span className="text-[#dd681f] text-[9px] font-black tracking-[0.3em] uppercase block">
+                            INFORMAÇÕES GERAIS
+                          </span>
+                          <h2 className="text-xl font-black tracking-tighter text-white uppercase block leading-none">
+                            ACAMP'S WINTER
+                          </h2>
+                          <div className="inline-block bg-[#dd681f]/10 text-[#dd681f] text-[9px] font-black px-2.5 py-1 rounded-none border-2 border-[#dd681f]/15 tracking-widest uppercase mt-1">
+                            {EVENT_INFO.targetAge.toUpperCase()}
+                          </div>
+                        </div>
 
-                      <div className="pt-2 pb-4">
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() => setShowInscricaoForm(true)}
-                          className="w-full bg-[#dd681f] hover:bg-white hover:text-[#254b8c] text-white border-2 border-transparent hover:border-[#dd681f] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
-                        >
-                          QUERO ME INSCREVER
-                          <Icons.ChevronRight className="w-4 h-4" />
-                        </motion.button>
+                        {/* Info highlights card (Sharp Corners, stark borders) */}
+                        <div className="bg-[#254b8c] border-2 border-[#2e5aa8] rounded-none p-3.5 space-y-3.5">
+                          <div className="flex items-center gap-2.5 text-xs">
+                            <Icons.Calendar className="w-4 h-4 text-[#dd681f] shrink-0" />
+                            <div>
+                              <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">DATAS</span>
+                              <span className="font-bold text-white block mt-0.5 font-mono uppercase">{EVENT_INFO.dates.toUpperCase()}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-2.5 text-xs border-t-2 border-[#2e5aa8] pt-2.5">
+                            <Icons.MapPin className="w-4 h-4 text-[#dd681f] shrink-0 mt-0.5" />
+                            <div>
+                              <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">LOCAL</span>
+                              <span className="font-bold text-white block mt-0.5 uppercase tracking-wide">{EVENT_INFO.location.toUpperCase()}</span>
+                              <span className="text-[10px] text-gray-500 block mt-0.5 leading-snug font-mono uppercase">{EVENT_INFO.address.toUpperCase()}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2.5 text-xs border-t-2 border-[#2e5aa8] pt-2.5">
+                            <Icons.Utensils className="w-4 h-4 text-[#dd681f] shrink-0" />
+                            <div>
+                              <span className="text-[9px] text-[#dd681f] block font-black uppercase tracking-widest">HOSPEDAGEM & ALIMENTAÇÃO</span>
+                              <span className="font-bold text-white block mt-0.5 uppercase tracking-wide">100% INCLUSO PARA OS 3 DIAS</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Core Highlights List */}
+                        <div className="space-y-2">
+                          <span className="text-[9px] text-[#dd681f] font-black tracking-[0.25em] uppercase block pl-1">
+                            O QUE ESTÁ INCLUSO:
+                          </span>
+                          <div className="grid grid-cols-1 gap-2">
+                            {EVENT_INFO.features.map((f, idx) => (
+                              <div key={idx} className="flex gap-2.5 p-2 bg-[#254b8c]/50 border-2 border-[#2e5aa8] rounded-none items-center">
+                                <div className="w-6 h-6 bg-neutral-900 flex items-center justify-center text-[#dd681f] shrink-0 border border-[#2e5aa8]">
+                                  <IconRenderer name={f.icon} className="w-3.5 h-3.5" />
+                                </div>
+                                <div>
+                                  <span className="text-xs font-black text-white block leading-none uppercase tracking-wide">{f.label.toUpperCase()}</span>
+                                  <span className="text-[9px] text-gray-500 block mt-1 uppercase tracking-wider font-mono">{f.description.toUpperCase()}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="pt-2 pb-4">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setShowInscricaoForm(true)}
+                            className="w-full bg-[#dd681f] hover:bg-white hover:text-[#254b8c] text-white border-2 border-transparent hover:border-[#dd681f] font-black py-3.5 px-4 rounded-none text-xs tracking-widest uppercase flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-300"
+                          >
+                            QUERO ME INSCREVER
+                            <Icons.ChevronRight className="w-4 h-4" />
+                          </motion.button>
+                        </div>
                       </div>
-                    </div>
+                    )
                   ) : (
                     <RegistrationForm
                       onSubmit={handleRegistrationSubmit}
