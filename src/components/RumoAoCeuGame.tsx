@@ -59,6 +59,7 @@ const INITIAL_CHARACTERS: Character[] = [
 
 export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameover'>('menu');
+  const [characters, setCharacters] = useState<Character[]>(INITIAL_CHARACTERS);
   const [selectedCharId, setSelectedCharId] = useState<string>('frassati');
   const [tercosWallet, setTercosWallet] = useState<number>(0);
   
