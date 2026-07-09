@@ -206,7 +206,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     const handleOrientation = (e: DeviceOrientationEvent) => {
       if (gameStateRef.current !== 'playing' || controlTypeRef.current !== 'tilt') return;
       if (e.gamma !== null) {
-        const sensitivity = 0.7;
+        const sensitivity = 1.1; // Increased sensitivity
         const speed = e.gamma * sensitivity;
         playerRef.current.vx = speed;
       }
@@ -990,6 +990,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   // Touch Event Handlers
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (gameStateRef.current !== 'playing') return;
+    if (controlTypeRef.current === 'tilt') return; // Do not override gyroscope mode
     setControlType('touch');
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1000,6 +1001,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (gameStateRef.current !== 'playing') return;
+    if (controlTypeRef.current === 'tilt') return; // Do not override gyroscope mode
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -1030,7 +1032,8 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onMouseMove={handleMouseMove}
-          className="w-full h-full bg-[#1b3b73] cursor-crosshair block"
+          className="w-full h-full bg-[#1b3b73] cursor-crosshair block touch-none"
+          style={{ touchAction: 'none' }}
         />
         
         {/* Active Power-up indicators overlays */}
@@ -1397,15 +1400,15 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
           </div>
         )}
         
-        {/* Floating Saint Quote Toast Notification (Doesn't pause gameplay) */}
+        {/* Floating Saint Quote Toast Notification (Top of screen, doesn't pause gameplay) */}
         <AnimatePresence>
           {activeQuote && (
             <motion.div
-              initial={{ y: 80, opacity: 0, scale: 0.95 }}
+              initial={{ y: -80, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 30, opacity: 0, scale: 0.95 }}
+              exit={{ y: -30, opacity: 0, scale: 0.95 }}
               transition={{ type: 'spring', damping: 15 }}
-              className="absolute bottom-4 left-3 right-3 bg-slate-955/90 border border-yellow-500/40 p-3.5 rounded-2xl shadow-2xl flex items-center gap-3.5 z-50 backdrop-blur-md"
+              className="absolute top-14 left-3 right-3 bg-slate-955/90 border border-yellow-500/40 p-3 rounded-2xl shadow-2xl flex items-center gap-3 z-50 backdrop-blur-md"
             >
               <div className="w-10 h-10 bg-gradient-to-tr from-yellow-500/20 to-yellow-300/20 border border-yellow-400 rounded-full flex items-center justify-center text-yellow-400 text-lg shrink-0 select-none shadow-[0_0_8px_rgba(234,179,8,0.3)]">
                 👼
