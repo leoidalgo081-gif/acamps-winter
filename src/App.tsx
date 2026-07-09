@@ -7,6 +7,8 @@ import PhoneMockup from './components/PhoneMockup';
 import RegistrationForm from './components/RegistrationForm';
 import TicketPass from './components/TicketPass';
 import { LogoAcamps, LogoShalom, LogoPJJ, PATRONS, InteractiveCharacters } from './components/BrandingAssets';
+import RumoAoCeuGame from './components/RumoAoCeuGame';
+
 
 // Snowflakes Background Component for ambient winter theme
 const Snowflakes = ({ inside = false }: { inside?: boolean }) => {
@@ -359,12 +361,18 @@ export default function App() {
     
     const isSecretAdmin = path.includes('admin') || search.includes('admin') || hash.includes('admin');
     
+    const isGame = path.includes('jogar') || path.includes('game') || 
+                   search.includes('jogar') || search.includes('game') || 
+                   hash.includes('jogar') || hash.includes('game');
+    
     if (isMoms) {
       setIsMomsMode(true);
     }
     
     if (isSecretAdmin) {
       setIsAdmin(true);
+    } else if (isGame) {
+      setCurrentStep('game');
     } else {
       // Record visit only once per session
       if (!sessionStorage.getItem('counted_visit')) {
@@ -447,7 +455,7 @@ export default function App() {
   useEffect(() => {
     if (!audioRef.current) return;
 
-    if (currentStep === 'quiz') {
+    if (currentStep === 'quiz' || currentStep === 'game') {
       // Force switch to acampswinter3.mp3 on loop
       if (!audioRef.current.src.endsWith('/acampswinter3.mp3')) {
         audioRef.current.pause();
@@ -910,6 +918,21 @@ export default function App() {
                     className="w-full bg-[#dd681f] text-white font-black text-[15px] py-4 px-6 rounded-2xl tracking-[0.2em] uppercase transition-all duration-300 shadow-[0_0_20px_rgba(221,104,31,0.6)] hover:shadow-[0_0_35px_rgba(221,104,31,0.9)] border border-[#dd681f]/50 cursor-pointer"
                   >
                     COMEÇAR
+                  </motion.button>
+
+                  <motion.button
+                    animate={isZoomingCabana ? { opacity: 0, y: 30, scale: 0.95 } : { opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.4 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      startMusicOnInteract();
+                      setCurrentStep('game');
+                    }}
+                    className="w-full bg-[#2e5aa8] hover:bg-[#254b8c] text-white font-black text-[14px] py-3.5 px-6 rounded-2xl tracking-[0.2em] uppercase transition-all duration-300 border-2 border-[#2e5aa8] cursor-pointer flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <Icons.Gamepad2 className="w-4.5 h-4.5" />
+                    JOGAR: RUMO AO CÉU! 🎮
                   </motion.button>
                 </div>
 
@@ -1616,6 +1639,19 @@ export default function App() {
                       </div>
                     </div>
                   )}
+                </motion.div>
+              )}
+
+              {/* STEP 6: RUMO AO CEU GAME */}
+              {currentStep === 'game' && (
+                <motion.div
+                  key="game"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col h-full overflow-hidden"
+                >
+                  <RumoAoCeuGame onBack={() => setCurrentStep('home')} />
                 </motion.div>
               )}
 

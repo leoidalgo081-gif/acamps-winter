@@ -4,7 +4,9 @@ export type AppStep =
   | 'revelation_intro'
   | 'revelation_collage'
   | 'details_registration'
-  | 'ticket';
+  | 'convince_mom'
+  | 'ticket'
+  | 'game';
 
 export interface QuizOption {
   text: string;
@@ -34,3 +36,19 @@ export interface RegistrationData {
   status: 'pending' | 'confirmed';
   patronId?: string; // Selected patron saint intercessor from elements branding
 }
+
+export interface GameScore {
+  name: string;
+  score: number;
+  height: number;
+  tercos: number;
+  date: string;
+  isPlayer?: boolean;
+}
+
+export interface SaintQuote {
+  quote: string;
+  saint: string;
+  avatarId: string; // carlo_acutis, jp2, dulce_dos_pobres, frassati, chiara_badano, etc.
+}
+
