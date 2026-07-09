@@ -301,8 +301,11 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     
     // Spawn a chain of reachable platforms up to top of screen
     let currentY = 480;
+    let lastX = 130;
     while (currentY > -1000) {
-      initialPlatforms.push(generatePlatformAtY(currentY));
+      const newPlat = generatePlatformAtY(currentY, lastX);
+      initialPlatforms.push(newPlat);
+      lastX = newPlat.x;
       currentY -= 48 + Math.random() * 20; // Short gaps to match shorter jumps
     }
     
@@ -315,12 +318,21 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   };
   
   // Procedural platform generator - Progressively harder
-  const generatePlatformAtY = (y: number): Platform => {
+  const generatePlatformAtY = (y: number, lastX?: number): Platform => {
     const heightIndex = Math.abs(y);
     
     // Platform width: starts wide (90px) and gets narrower (down to 40px)
     const width = Math.max(38, 90 - (heightIndex / 150));
-    const x = Math.random() * (360 - width - 20) + 10;
+    
+    let x;
+    if (lastX !== undefined) {
+      const maxDiff = 110; // Maximum reachable horizontal delta
+      const minX = Math.max(10, lastX - maxDiff);
+      const maxX = Math.min(360 - width - 10, lastX + maxDiff);
+      x = minX + Math.random() * (maxX - minX);
+    } else {
+      x = Math.random() * (360 - width - 20) + 10;
+    }
     
     // Platform types distribution based on height
     let type: Platform['type'] = 'normal';
@@ -369,7 +381,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   
   // Longer Vertical Zones
   const getZoneInfo = (height: number) => {
-    if (height < 6000) {
+    if (height < 15000) {
       return {
         name: 'Terra',
         gradientStart: '#1b3b73',
@@ -378,7 +390,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Partindo rumo ao alto!',
         textColor: '#e2f0d9'
       };
-    } else if (height < 13000) {
+    } else if (height < 32000) {
       return {
         name: 'Infância',
         gradientStart: '#254b8c',
@@ -387,7 +399,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Como crianças no colo do Pai.',
         textColor: '#fceade'
       };
-    } else if (height < 21000) {
+    } else if (height < 52000) {
       return {
         name: 'Juventude',
         gradientStart: '#90422c',
@@ -396,7 +408,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'O vigor de quem consagra seus dias.',
         textColor: '#ffebdb'
       };
-    } else if (height < 30000) {
+    } else if (height < 75000) {
       return {
         name: 'Vocação',
         gradientStart: '#43196c',
@@ -405,7 +417,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Escutando o chamado de amor.',
         textColor: '#fdf3d1'
       };
-    } else if (height < 40000) {
+    } else if (height < 100000) {
       return {
         name: 'Santidade',
         gradientStart: '#28114f',
@@ -638,14 +650,20 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     
     // Spawn new platforms
     let highestY = 580;
+    let lastX = 160;
     platformsRef.current.forEach(plat => {
-      if (plat.y < highestY) highestY = plat.y;
+      if (plat.y < highestY) {
+        highestY = plat.y;
+        lastX = plat.x;
+      }
     });
     
     const viewTop = cameraScrollRef.current;
     while (highestY > viewTop - 600) {
       const newY = highestY - (gap + Math.random() * 15);
-      platformsRef.current.push(generatePlatformAtY(newY));
+      const newPlat = generatePlatformAtY(newY, lastX);
+      platformsRef.current.push(newPlat);
+      lastX = newPlat.x;
       highestY = newY;
     }
     
@@ -1413,11 +1431,11 @@ function LevelChangeNotification({ height }: { height: number }) {
   const [lastLevel, setLastLevel] = useState('Terra');
   const [show, setShow] = useState(false);
   
-  const currentLevelName = height < 6000 ? 'Terra'
-                         : height < 13000 ? 'Infância'
-                         : height < 21000 ? 'Juventude'
-                         : height < 30000 ? 'Vocação'
-                         : height < 40000 ? 'Santidade'
+  const currentLevelName = height < 15000 ? 'Terra'
+                         : height < 32000 ? 'Infância'
+                         : height < 52000 ? 'Juventude'
+                         : height < 75000 ? 'Vocação'
+                         : height < 100000 ? 'Santidade'
                          : 'Céu';
   
   useEffect(() => {
