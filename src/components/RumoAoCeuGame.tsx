@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import * as Icons from 'lucide-react';
-import { GameScore, SaintQuote } from '../types';
+import { SaintQuote } from '../types';
 
 interface Character {
   id: string;
@@ -22,7 +22,7 @@ interface Platform {
   type: 'normal' | 'moving' | 'breakable' | 'boost';
   direction: number; // for moving platforms
   broken: boolean;
-  hasCollectible: 'none' | 'terco' | 'frase';
+  hasCollectible: 'none' | 'terco' | 'frase' | 'agua_benta' | 'hostia' | 'cruz';
 }
 
 interface Particle {
@@ -34,7 +34,7 @@ interface Particle {
   color: string;
   life: number;
   maxLife: number;
-  type: 'star' | 'cross' | 'dust';
+  type: 'star' | 'cross' | 'dust' | 'bubble';
 }
 
 const SAINT_QUOTES: SaintQuote[] = [
@@ -51,37 +51,24 @@ const SAINT_QUOTES: SaintQuote[] = [
 ];
 
 const INITIAL_CHARACTERS: Character[] = [
-  { id: 'boneco_1', name: 'Mascote Azul', avatar: '/novo_boneco_1.png', description: 'Jovem alegre e pronto para o acampamento.', cost: 0, unlocked: true, jumpBoost: 1.0, speedBoost: 1.0 },
-  { id: 'boneco_2', name: 'Mascote Laranja', avatar: '/novo_boneco_2.png', description: 'Super ágil, desliza mais rápido pelo cenário.', cost: 0, unlocked: true, jumpBoost: 1.0, speedBoost: 1.25 },
-  { id: 'boneco_3', name: 'Mascote Roxo', avatar: '/novo_boneco_3.png', description: 'Equilibrado e focado nas amizades do acampamento.', cost: 0, unlocked: true, jumpBoost: 1.0, speedBoost: 1.0 },
-  { id: 'carlo_acutis', name: 'Carlo Acutis', avatar: '/novo_boneco_4.png', description: 'Padroeiro da Internet. Pula um pouco mais alto.', cost: 10, unlocked: false, jumpBoost: 1.15, speedBoost: 1.1 },
-  { id: 'frassati', name: 'Pier Giorgio', avatar: '/boneco_2.png', description: 'O jovem alpinista. Pulos muito altos!', cost: 20, unlocked: false, jumpBoost: 1.25, speedBoost: 1.0 },
-  { id: 'chiara_badano', name: 'Chiara Luce', avatar: '/boneco_3.png', description: 'Sorriso luminoso. Ganha 1.5x mais pontos por terços.', cost: 30, unlocked: false, jumpBoost: 1.05, speedBoost: 1.15 },
-  { id: 'jp2', name: 'João Paulo II', avatar: '/boneco_4.png', description: 'Papa dos Jovens. Super salto celestial!', cost: 40, unlocked: false, jumpBoost: 1.3, speedBoost: 0.95 },
-  { id: 'dulce_dos_pobres', name: 'Irmã Dulce', avatar: '/boneco_5.png', description: 'Anjo Bom da Bahia. Imune ao primeiro tombo!', cost: 50, unlocked: false, jumpBoost: 1.0, speedBoost: 1.1 }
-];
-
-const MOCK_LEADERBOARD: GameScore[] = [
-  { name: 'Carlo Acutis', score: 15200, height: 1250, tercos: 27, date: '08/07/2026' },
-  { name: 'Pe. Jonas Shalom', score: 9800, height: 820, tercos: 16, date: '08/07/2026' },
-  { name: 'Mariana PJJ', score: 7400, height: 610, tercos: 13, date: '08/07/2026' },
-  { name: 'Lucas Vocacionado', score: 5200, height: 450, tercos: 7, date: '07/07/2026' },
-  { name: 'Duda Acampista', score: 3100, height: 280, tercos: 3, date: '06/07/2026' }
+  { id: 'frassati', name: 'Pier Giorgio Frassati', avatar: '/novo_boneco_1.png', description: 'O jovem alpinista. Pulos muito altos!', cost: 0, unlocked: true, jumpBoost: 1.25, speedBoost: 1.0 },
+  { id: 'chiara_badano', name: 'Chiara Luce Badano', avatar: '/novo_boneco_2.png', description: 'Sorriso luminoso. Ganha 1.5x mais pontos por terços.', cost: 0, unlocked: true, jumpBoost: 1.05, speedBoost: 1.15 },
+  { id: 'jp2', name: 'São João Paulo II', avatar: '/novo_boneco_3.png', description: 'Papa dos Jovens. Super salto celestial e imunidade a quedas!', cost: 0, unlocked: true, jumpBoost: 1.3, speedBoost: 0.95 },
+  { id: 'carlo_acutis', name: 'Beato Carlo Acutis', avatar: '/novo_boneco_4.png', description: 'Padroeiro da Internet. Pula e corre mais rápido.', cost: 0, unlocked: true, jumpBoost: 1.15, speedBoost: 1.1 }
 ];
 
 export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
-  const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameover' | 'shop'>('menu');
-  const [characters, setCharacters] = useState<Character[]>(INITIAL_CHARACTERS);
-  const [selectedCharId, setSelectedCharId] = useState<string>('boneco_1');
+  const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameover'>('menu');
+  const [selectedCharId, setSelectedCharId] = useState<string>('frassati');
   const [tercosWallet, setTercosWallet] = useState<number>(0);
-  const [leaderboard, setLeaderboard] = useState<GameScore[]>(MOCK_LEADERBOARD);
   
   // Game stats
   const [score, setScore] = useState(0);
   const [maxHeight, setMaxHeight] = useState(0);
   const [tercosCollected, setTercosCollected] = useState(0);
-  const [newHighScore, setNewHighScore] = useState(false);
-  const [playerName, setPlayerName] = useState('');
+  
+  // Power-up active states (for UI rendering)
+  const [activePowerUps, setActivePowerUps] = useState<{ name: string; timeLeft: number; icon: string }[]>([]);
   
   // Saint Quote Modal
   const [activeQuote, setActiveQuote] = useState<SaintQuote | null>(null);
@@ -95,7 +82,25 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const requestRef = useRef<number | null>(null);
   
-  // Physics engine states (stored in refs to avoid React lag in requestAnimationFrame)
+  // REFS TO PREVENT CLOSURE BUGS IN GAMELOOP
+  const gameStateRef = useRef<'menu' | 'playing' | 'gameover'>('menu');
+  const showQuoteModalRef = useRef<boolean>(false);
+  const controlTypeRef = useRef<'mouse' | 'touch' | 'keyboard' | 'tilt'>('mouse');
+  
+  // Synchronize refs with state
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
+  
+  useEffect(() => {
+    showQuoteModalRef.current = showQuoteModal;
+  }, [showQuoteModal]);
+
+  useEffect(() => {
+    controlTypeRef.current = controlType;
+  }, [controlType]);
+  
+  // Physics engine states (stored in refs for performance and exact loops)
   const playerRef = useRef({
     x: 180,
     y: 400,
@@ -106,49 +111,29 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     targetX: 180,
     jumpStrength: -9.5,
     speed: 5,
-    hasShield: false, // For Irma Dulce immunity
-    usedShield: false
+    hasShield: false, // JPII or Cruz de São Bento shield
+    usedShield: false,
+    
+    // Active power-up timers
+    holyWaterTime: 0, // multiplier active
+    doublePointsTime: 0 // double score multiplier active
   });
   
   const platformsRef = useRef<Platform[]>([]);
   const particlesRef = useRef<Particle[]>([]);
   const cameraScrollRef = useRef<number>(0);
-  const currentHeightRef = useRef<number>(0); // how high player climbed
+  const currentHeightRef = useRef<number>(0);
   const tercosInRunRef = useRef<number>(0);
   const scoreRef = useRef<number>(0);
   const keysPressedRef = useRef<{ [key: string]: boolean }>({});
   
-  const activeChar = characters.find(c => c.id === selectedCharId) || characters[0];
+  const activeChar = INITIAL_CHARACTERS.find(c => c.id === selectedCharId) || INITIAL_CHARACTERS[0];
   
   // Load saved data from localStorage
   useEffect(() => {
     const savedTercos = localStorage.getItem('rumoaoceu_tercos');
     if (savedTercos) {
       setTercosWallet(parseInt(savedTercos));
-    }
-    
-    const savedChars = localStorage.getItem('rumoaoceu_unlocked_chars');
-    if (savedChars) {
-      try {
-        const unlockedIds = JSON.parse(savedChars) as string[];
-        setCharacters(prev => prev.map(c => ({
-          ...c,
-          unlocked: unlockedIds.includes(c.id) || c.cost === 0
-        })));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    
-    const savedScores = localStorage.getItem('rumoaoceu_scores');
-    if (savedScores) {
-      try {
-        setLeaderboard(JSON.parse(savedScores));
-      } catch (e) {
-        console.error(e);
-      }
-    } else {
-      localStorage.setItem('rumoaoceu_scores', JSON.stringify(MOCK_LEADERBOARD));
     }
     
     const savedCharId = localStorage.getItem('rumoaoceu_selected_char');
@@ -159,9 +144,9 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     // Check tilt support
     if (window.DeviceOrientationEvent && 'ontouchstart' in window) {
       setTiltSupported(true);
-      setControlType('touch'); // Default mobile to touch
+      setControlType('touch');
     } else {
-      setControlType('mouse'); // Default desktop to mouse
+      setControlType('mouse');
     }
   }, []);
   
@@ -169,7 +154,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       keysPressedRef.current[e.key] = true;
-      if (gameState === 'playing' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'a' || e.key === 'd')) {
+      if (gameStateRef.current === 'playing' && (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'a' || e.key === 'd')) {
         setControlType('keyboard');
       }
     };
@@ -185,48 +170,33 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [gameState]);
+  }, []);
   
   // Handle Tilt Event
   useEffect(() => {
     const handleOrientation = (e: DeviceOrientationEvent) => {
-      if (gameState !== 'playing' || controlType !== 'tilt') return;
-      // Gamma is left/right tilt in degrees (-90 to 90)
+      if (gameStateRef.current !== 'playing' || controlTypeRef.current !== 'tilt') return;
       if (e.gamma !== null) {
-        // Map tilt angle to target horizontal offset
         const sensitivity = 0.8;
         const speed = e.gamma * sensitivity;
         playerRef.current.vx = speed;
       }
     };
     
-    if (controlType === 'tilt') {
-      window.addEventListener('deviceorientation', handleOrientation);
-    }
-    
+    window.addEventListener('deviceorientation', handleOrientation);
     return () => {
       window.removeEventListener('deviceorientation', handleOrientation);
     };
-  }, [controlType, gameState]);
+  }, []);
   
   // Load Character Sprites
   const charImagesRef = useRef<{ [key: string]: HTMLImageElement }>({});
   useEffect(() => {
-    // Preload character images
-    characters.forEach(char => {
+    INITIAL_CHARACTERS.forEach(char => {
       const img = new Image();
       img.src = char.avatar;
       charImagesRef.current[char.id] = img;
     });
-  }, [characters]);
-  
-  // Load UI icons (Terço, Pergaminho)
-  const uiImagesRef = useRef<{ terco: HTMLImageElement | null; scroll: HTMLImageElement | null }>({
-    terco: null,
-    scroll: null
-  });
-  useEffect(() => {
-    // Generate simple icons if images fail, but let's try creating beautiful canvas drawings first.
   }, []);
   
   // Request device orientation permissions (iOS)
@@ -255,11 +225,14 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   
   // Main physics & rendering game loop
   const startGame = () => {
+    gameStateRef.current = 'playing';
     setGameState('playing');
     setScore(0);
     setMaxHeight(0);
     setTercosCollected(0);
-    setNewHighScore(false);
+    setActivePowerUps([]);
+    
+    const char = INITIAL_CHARACTERS.find(c => c.id === selectedCharId) || INITIAL_CHARACTERS[0];
     
     // Reset positions
     playerRef.current = {
@@ -270,10 +243,12 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       vx: 0,
       vy: 0,
       targetX: 160,
-      jumpStrength: -9.5 * activeChar.jumpBoost,
-      speed: 5 * activeChar.speedBoost,
-      hasShield: activeChar.id === 'dulce_dos_pobres',
-      usedShield: false
+      jumpStrength: -9.5 * char.jumpBoost,
+      speed: 5 * char.speedBoost,
+      hasShield: char.id === 'jp2', // São João Paulo II starts with a shield
+      usedShield: false,
+      holyWaterTime: 0,
+      doublePointsTime: 0
     };
     
     cameraScrollRef.current = 0;
@@ -281,9 +256,8 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     tercosInRunRef.current = 0;
     scoreRef.current = 0;
     
-    // Setup initial platforms
+    // Setup initial platforms - Easy spacing at start
     const initialPlatforms: Platform[] = [];
-    // Base platform
     initialPlatforms.push({
       x: 130,
       y: 530,
@@ -299,7 +273,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     let currentY = 480;
     while (currentY > -1000) {
       initialPlatforms.push(generatePlatformAtY(currentY));
-      currentY -= 65 + Math.random() * 45;
+      currentY -= 55 + Math.random() * 25; // Smaller gaps at the beginning
     }
     
     platformsRef.current = initialPlatforms;
@@ -310,34 +284,47 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     requestRef.current = requestAnimationFrame(gameLoop);
   };
   
+  // Procedural platform generator - Progressively harder
   const generatePlatformAtY = (y: number): Platform => {
-    const width = 60 - Math.min(25, y / -200); // gets narrower as we rise
+    const heightIndex = Math.abs(y);
+    
+    // Platform width: starts wide (90px) and gets narrower (down to 40px)
+    const width = Math.max(38, 90 - (heightIndex / 100));
     const x = Math.random() * (360 - width - 20) + 10;
     
-    // Platform types distribution based on height (y gets highly negative as we rise)
-    const heightIndex = Math.abs(y);
+    // Platform types distribution based on height
     let type: Platform['type'] = 'normal';
-    
     const r = Math.random();
-    if (heightIndex > 500) {
+    
+    if (heightIndex > 800) {
       if (r < 0.15) type = 'moving';
       else if (r < 0.22) type = 'breakable';
       else if (r < 0.27) type = 'boost';
     }
-    if (heightIndex > 2000) {
-      if (r < 0.3) type = 'moving';
-      else if (r < 0.42) type = 'breakable';
-      else if (r < 0.5) type = 'boost';
+    if (heightIndex > 3000) {
+      if (r < 0.35) type = 'moving';
+      else if (r < 0.50) type = 'breakable';
+      else if (r < 0.58) type = 'boost';
     }
     
-    // Collectibles distribution
+    // Collectibles distribution: Rosaries, Scrolls and Catholic Power-ups
     let hasCollectible: Platform['hasCollectible'] = 'none';
     const collRand = Math.random();
+    
     if (type !== 'breakable') {
       if (collRand < 0.08) {
         hasCollectible = 'terco';
       } else if (collRand < 0.11) {
         hasCollectible = 'frase';
+      } else if (collRand < 0.14) {
+        // Catholic Power-up: Agua Benta (💧)
+        hasCollectible = 'agua_benta';
+      } else if (collRand < 0.16) {
+        // Catholic Power-up: Hostia (✝️)
+        hasCollectible = 'hostia';
+      } else if (collRand < 0.18) {
+        // Catholic Power-up: Cruz de Sao Bento (🛡️)
+        hasCollectible = 'cruz';
       }
     }
     
@@ -353,8 +340,9 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     };
   };
   
+  // Longer Vertical Zones
   const getZoneInfo = (height: number) => {
-    if (height < 1000) {
+    if (height < 2000) {
       return {
         name: 'Terra',
         gradientStart: '#1b3b73',
@@ -363,7 +351,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Partindo rumo ao alto!',
         textColor: '#e2f0d9'
       };
-    } else if (height < 2000) {
+    } else if (height < 4500) {
       return {
         name: 'Infância',
         gradientStart: '#254b8c',
@@ -372,7 +360,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Como crianças no colo do Pai.',
         textColor: '#fceade'
       };
-    } else if (height < 3000) {
+    } else if (height < 7000) {
       return {
         name: 'Juventude',
         gradientStart: '#90422c',
@@ -381,7 +369,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'O vigor de quem consagra seus dias.',
         textColor: '#ffebdb'
       };
-    } else if (height < 4500) {
+    } else if (height < 10000) {
       return {
         name: 'Vocação',
         gradientStart: '#43196c',
@@ -390,7 +378,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Escutando o chamado de amor.',
         textColor: '#fdf3d1'
       };
-    } else if (height < 6000) {
+    } else if (height < 13500) {
       return {
         name: 'Santidade',
         gradientStart: '#28114f',
@@ -413,8 +401,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   
   // Game Loop
   const gameLoop = () => {
-    if (gameState === 'gameover' || showQuoteModal) {
-      // Pause animation loop if modal is open or game over
+    if (gameStateRef.current !== 'playing') {
       return;
     }
     
@@ -429,8 +416,10 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       return;
     }
     
-    // 1. UPDATE PHYSICS
-    updatePhysics();
+    // 1. Only update physics if quote modal is NOT open
+    if (!showQuoteModalRef.current) {
+      updatePhysics();
+    }
     
     // 2. RENDER GRAPHICS
     renderGraphics(ctx);
@@ -447,7 +436,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         y,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
-        size: type === 'cross' ? 4 + Math.random() * 4 : 2 + Math.random() * 3,
+        size: type === 'cross' ? 4 + Math.random() * 4 : type === 'bubble' ? 3 + Math.random() * 3 : 2 + Math.random() * 3,
         color,
         life: 0,
         maxLife: 30 + Math.random() * 20,
@@ -459,11 +448,29 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   const updatePhysics = () => {
     const player = playerRef.current;
     
+    // Decrement power-up timers
+    if (player.holyWaterTime > 0) player.holyWaterTime = Math.max(0, player.holyWaterTime - 1 / 60);
+    if (player.doublePointsTime > 0) player.doublePointsTime = Math.max(0, player.doublePointsTime - 1 / 60);
+    
+    // Sync powerups state to React state for UI rendering
+    const list: typeof activePowerUps = [];
+    if (player.holyWaterTime > 0) {
+      list.push({ name: 'Água Benta (Pulo 1.35x)', timeLeft: player.holyWaterTime, icon: '💧' });
+    }
+    if (player.doublePointsTime > 0) {
+      list.push({ name: 'Bíblia (Pontos 2x)', timeLeft: player.doublePointsTime, icon: '📖' });
+    }
+    if (player.hasShield) {
+      list.push({ name: 'Escudo Santo', timeLeft: 999, icon: '🛡️' });
+    }
+    // Update active powerups state only once in a while or directly (doesn't hurt performance since it is a small array)
+    setActivePowerUps(list);
+    
     // Apply gravity
     player.vy += 0.35;
     
     // Apply horizontal controls
-    if (controlType === 'keyboard') {
+    if (controlTypeRef.current === 'keyboard') {
       const accel = 0.6;
       const maxVx = player.speed;
       if (keysPressedRef.current['ArrowLeft'] || keysPressedRef.current['a']) {
@@ -473,37 +480,32 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       } else {
         player.vx *= 0.85; // friction
       }
-    } else if (controlType === 'mouse' || controlType === 'touch') {
-      // Interpolate x towards targetX
+    } else if (controlTypeRef.current === 'mouse' || controlTypeRef.current === 'touch') {
       const ease = 0.16;
       player.x += (player.targetX - player.x - player.width / 2) * ease;
-    } else if (controlType === 'tilt') {
-      // vx is already set in deviceorientation event, apply decay/friction
+    } else if (controlTypeRef.current === 'tilt') {
       player.vx = Math.max(-player.speed * 1.5, Math.min(player.speed * 1.5, player.vx));
     }
     
-    // Apply vx to x for keys/tilt
-    if (controlType === 'keyboard' || controlType === 'tilt') {
+    if (controlTypeRef.current === 'keyboard' || controlTypeRef.current === 'tilt') {
       player.x += player.vx;
     }
     
-    // Apply velocity y to y
     player.y += player.vy;
     
     // Screen wrapping (Left/Right margins)
     if (player.x + player.width < 0) {
       player.x = 360;
-      if (controlType === 'mouse' || controlType === 'touch') player.targetX = 360;
+      if (controlTypeRef.current === 'mouse' || controlTypeRef.current === 'touch') player.targetX = 360;
     } else if (player.x > 360) {
       player.x = -player.width;
-      if (controlType === 'mouse' || controlType === 'touch') player.targetX = 0;
+      if (controlTypeRef.current === 'mouse' || controlTypeRef.current === 'touch') player.targetX = 0;
     }
     
     // Calculate current vertical climbing height
     const currentHeight = Math.floor(Math.max(0, 400 - player.y));
     if (currentHeight > currentHeightRef.current) {
       currentHeightRef.current = currentHeight;
-      // Height record
       if (currentHeight > maxHeight) {
         setMaxHeight(currentHeight);
       }
@@ -511,7 +513,8 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     
     // Calculate Score (Height + 100 * Terços)
     const pointsMultiplier = activeChar.id === 'chiara_badano' ? 1.5 : 1.0;
-    const currentScore = currentHeightRef.current + Math.floor(tercosInRunRef.current * 100 * pointsMultiplier);
+    const doubleMultiplier = player.doublePointsTime > 0 ? 2.0 : 1.0;
+    const currentScore = currentHeightRef.current + Math.floor(tercosInRunRef.current * 100 * pointsMultiplier * doubleMultiplier);
     scoreRef.current = currentScore;
     setScore(currentScore);
     
@@ -526,7 +529,6 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       for (let i = 0; i < platformsRef.current.length; i++) {
         const plat = platformsRef.current[i];
         
-        // Collide feet area with platform top bounding box
         if (
           player.x + player.width - 5 >= plat.x &&
           player.x + 5 <= plat.x + plat.width &&
@@ -534,16 +536,17 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
           player.y + player.height - player.vy <= plat.y + 12
         ) {
           // Bounce!
+          const activeJumpMultiplier = player.holyWaterTime > 0 ? 1.35 : 1.0;
+          
           if (plat.type === 'breakable') {
             plat.broken = true;
             createExplosion(plat.x + plat.width / 2, plat.y + 6, '#b45309', 15, 'dust');
-            // Give a tiny bounce but it breaks
             player.vy = -3;
           } else if (plat.type === 'boost') {
-            player.vy = player.jumpStrength * 1.8;
+            player.vy = player.jumpStrength * 1.8 * activeJumpMultiplier;
             createExplosion(player.x + player.width / 2, player.y + player.height, '#fbbf24', 25, 'star');
           } else {
-            player.vy = player.jumpStrength;
+            player.vy = player.jumpStrength * activeJumpMultiplier;
             createExplosion(player.x + player.width / 2, player.y + player.height, '#ffffff', 8, 'dust');
           }
           break;
@@ -551,36 +554,49 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       }
     }
     
-    // Check item collection
+    // Check item/power-up collection
     for (let i = 0; i < platformsRef.current.length; i++) {
       const plat = platformsRef.current[i];
       if (plat.hasCollectible !== 'none') {
         const itemX = plat.x + plat.width / 2;
         const itemY = plat.y - 15;
         
-        // Collision circle check
         const dist = Math.hypot(
           (player.x + player.width / 2) - itemX,
           (player.y + player.height / 2) - itemY
         );
         
         if (dist < 28) {
-          if (plat.hasCollectible === 'terco') {
+          const type = plat.hasCollectible;
+          plat.hasCollectible = 'none';
+          
+          if (type === 'terco') {
             // Collect Rosary
             tercosInRunRef.current += 1;
             setTercosCollected(tercosInRunRef.current);
             createExplosion(itemX, itemY, '#facc15', 18, 'cross');
-          } else if (plat.hasCollectible === 'frase') {
+          } else if (type === 'frase') {
             // Collect Saint scroll
             createExplosion(itemX, itemY, '#38bdf8', 20, 'star');
             triggerSaintQuote();
+          } else if (type === 'agua_benta') {
+            // Catholic Power-up: Agua Benta (💧) -> High Jump Boost
+            player.holyWaterTime = 8.0; // 8 seconds of super jump
+            createExplosion(itemX, itemY, '#60a5fa', 22, 'bubble');
+          } else if (type === 'hostia') {
+            // Catholic Power-up: Hostia (✝️) -> Super Launch rocket boost
+            player.vy = -18; // Launches extremely high!
+            createExplosion(itemX, itemY, '#ffffff', 35, 'star');
+          } else if (type === 'cruz') {
+            // Catholic Power-up: Cruz (🛡️) -> Protect from next fall
+            player.hasShield = true;
+            createExplosion(itemX, itemY, '#ef4444', 25, 'cross');
           }
-          plat.hasCollectible = 'none';
         }
       }
     }
     
-    // Moving platforms animation & boundary check
+    // Moving platforms horizontal animation
     platformsRef.current.forEach(plat => {
       if (plat.type === 'moving') {
         plat.x += plat.direction * 1.5;
@@ -594,12 +610,15 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       }
     });
     
-    // Clean up platforms off screen bottom and spawn new ones on top
+    // Spawning gap increases with height (makes it harder as we rise)
+    const heightIndex = Math.abs(player.y);
+    const gap = 55 + Math.min(50, heightIndex / 100);
+    
+    // Clean up old platforms off screen
     const viewBottom = cameraScrollRef.current + 580;
-    // Keep platforms that are not too far down
     platformsRef.current = platformsRef.current.filter(plat => plat.y < viewBottom + 50 && !plat.broken);
     
-    // Spawn new platforms at the top if highest platform is below screen top
+    // Spawn new platforms
     let highestY = 580;
     platformsRef.current.forEach(plat => {
       if (plat.y < highestY) highestY = plat.y;
@@ -607,7 +626,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     
     const viewTop = cameraScrollRef.current;
     while (highestY > viewTop - 600) {
-      const newY = highestY - (60 + Math.random() * 45);
+      const newY = highestY - (gap + Math.random() * 20);
       platformsRef.current.push(generatePlatformAtY(newY));
       highestY = newY;
     }
@@ -617,20 +636,19 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       p.x += p.vx;
       p.y += p.vy;
       p.life++;
-      p.vy += 0.05; // tiny particle gravity
+      p.vy += 0.05;
     });
     particlesRef.current = particlesRef.current.filter(p => p.life < p.maxLife);
     
     // Game Over check: Player falls below screen view bottom
     if (player.y > viewBottom) {
-      if (player.hasShield && !player.usedShield) {
-        // Irmã Dulce first fall immunity! Teleport player up to nearest platform
-        player.usedShield = true;
+      if (player.hasShield) {
+        // Shield recovery! Launch player back up to nearest platform
         player.hasShield = false;
-        player.vy = -12; // super jump recovery
+        player.usedShield = true;
+        player.vy = -12;
         
-        // Find nearest platform above
-        let nearestPlat = platformsRef.current[0];
+        let nearestPlat = platformsRef.current[0] || { x: 130, y: 300, width: 100 };
         let minDist = 99999;
         platformsRef.current.forEach(plat => {
           const dist = Math.abs(plat.y - player.y);
@@ -644,89 +662,34 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         player.y = nearestPlat.y - 100;
         createExplosion(player.x + player.width / 2, player.y + player.height, '#38bdf8', 30, 'star');
       } else {
-        // Game Over!
         endGame();
       }
     }
   };
   
   const triggerSaintQuote = () => {
-    // Select random saint quote
     const randQuote = SAINT_QUOTES[Math.floor(Math.random() * SAINT_QUOTES.length)];
     setActiveQuote(randQuote);
     setShowQuoteModal(true);
-    
-    // Cancel animation loop frame to pause physics
-    if (requestRef.current) cancelAnimationFrame(requestRef.current);
+    showQuoteModalRef.current = true;
   };
   
   const dismissQuoteModal = () => {
     setShowQuoteModal(false);
+    showQuoteModalRef.current = false;
     setActiveQuote(null);
-    // Resume loop
-    if (requestRef.current) cancelAnimationFrame(requestRef.current);
-    requestRef.current = requestAnimationFrame(gameLoop);
   };
   
   const endGame = () => {
+    gameStateRef.current = 'gameover';
+    setGameState('gameover');
+    
     if (requestRef.current) cancelAnimationFrame(requestRef.current);
     
     // Update permanently saved Terços
     const currentWallet = tercosWallet + tercosInRunRef.current;
     setTercosWallet(currentWallet);
     localStorage.setItem('rumoaoceu_tercos', currentWallet.toString());
-    
-    // Check high score
-    const finalScore = scoreRef.current;
-    const isNewHigh = leaderboard.length < 5 || finalScore > leaderboard[leaderboard.length - 1].score;
-    setNewHighScore(isNewHigh);
-    
-    setGameState('gameover');
-  };
-  
-  const submitScore = () => {
-    if (!playerName.trim()) return;
-    
-    const finalScore = scoreRef.current;
-    const finalHeight = currentHeightRef.current;
-    const finalTercos = tercosInRunRef.current;
-    
-    const newEntry: GameScore = {
-      name: playerName.trim(),
-      score: finalScore,
-      height: finalHeight,
-      tercos: finalTercos,
-      date: new Date().toLocaleDateString('pt-BR'),
-      isPlayer: true
-    };
-    
-    const updatedLeaderboard = [...leaderboard, newEntry]
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 5); // Keep top 5
-      
-    setLeaderboard(updatedLeaderboard);
-    localStorage.setItem('rumoaoceu_scores', JSON.stringify(updatedLeaderboard));
-    setNewHighScore(false);
-  };
-  
-  const unlockCharacter = (char: Character) => {
-    if (tercosWallet >= char.cost) {
-      const newWallet = tercosWallet - char.cost;
-      setTercosWallet(newWallet);
-      localStorage.setItem('rumoaoceu_tercos', newWallet.toString());
-      
-      const updatedChars = characters.map(c => {
-        if (c.id === char.id) return { ...c, unlocked: true };
-        return c;
-      });
-      setCharacters(updatedChars);
-      
-      // Save unlocked character list
-      const unlockedIds = updatedChars.filter(c => c.unlocked).map(c => c.id);
-      localStorage.setItem('rumoaoceu_unlocked_chars', JSON.stringify(unlockedIds));
-    } else {
-      alert('Você não tem terços suficientes! Suba mais no jogo para coletar.');
-    }
   };
   
   const selectCharacter = (id: string) => {
@@ -741,7 +704,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw Dynamic Gradient Background based on current height
+    // Draw Dynamic Gradient Background
     const zone = getZoneInfo(currentHeightRef.current);
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     grad.addColorStop(0, zone.gradientStart);
@@ -749,38 +712,32 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Apply camera transformation (scroll offset)
     ctx.save();
     ctx.translate(0, -cameraScrollRef.current);
     
     // Draw platforms
     platformsRef.current.forEach(plat => {
-      // Platform border/shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      // Platform shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
       ctx.fillRect(plat.x + 3, plat.y + 4, plat.width, plat.height);
       
-      // Select platform body color
+      // Platform color
       ctx.fillStyle = zone.platformColor;
       
-      // Draw platform
       if (plat.type === 'normal') {
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
-        // Grass top/details
         ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.fillRect(plat.x, plat.y, plat.width, 3);
       } else if (plat.type === 'moving') {
-        // Double horizontal lines for moving platforms
-        ctx.fillStyle = '#38bdf8'; // neon blue for moving
+        ctx.fillStyle = '#38bdf8'; // Blue for moving
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.fillRect(plat.x + 4, plat.y + 3, plat.width - 8, 2);
       } else if (plat.type === 'boost') {
-        // Golden platform with golden arrows
-        ctx.fillStyle = '#f59e0b'; // Gold
+        ctx.fillStyle = '#fbbf24'; // Gold
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
         
         ctx.fillStyle = '#ffffff';
-        // Draw little arrow in the middle
         const midX = plat.x + plat.width / 2;
         ctx.beginPath();
         ctx.moveTo(midX, plat.y + 9);
@@ -789,11 +746,9 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         ctx.lineTo(midX + 5, plat.y + 9);
         ctx.fill();
       } else if (plat.type === 'breakable') {
-        // Wood style
-        ctx.fillStyle = '#78350f';
+        ctx.fillStyle = '#78350f'; // Wood
         ctx.fillRect(plat.x, plat.y, plat.width, plat.height);
-        // Draw cracks
-        ctx.strokeStyle = '#f59e0b';
+        ctx.strokeStyle = '#d97706';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(plat.x + 10, plat.y);
@@ -803,39 +758,74 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         ctx.stroke();
       }
       
-      // Draw Collectibles on platforms
+      // Draw Collectibles
       if (plat.hasCollectible !== 'none') {
         const itemX = plat.x + plat.width / 2;
         const itemY = plat.y - 12;
         
         if (plat.hasCollectible === 'terco') {
-          // Draw Terço (golden circle with small cross at the bottom)
+          // Terço (Gold Circle + Cross)
           ctx.beginPath();
           ctx.arc(itemX, itemY - 3, 5, 0, Math.PI * 2);
           ctx.strokeStyle = '#facc15';
           ctx.lineWidth = 2.5;
           ctx.stroke();
           
-          // Draw cross
           ctx.strokeStyle = '#facc15';
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.moveTo(itemX, itemY + 2);
-          ctx.lineTo(itemX, itemY + 8); // vertical bar
+          ctx.lineTo(itemX, itemY + 8);
           ctx.moveTo(itemX - 3, itemY + 4);
-          ctx.lineTo(itemX + 3, itemY + 4); // horizontal bar
+          ctx.lineTo(itemX + 3, itemY + 4);
           ctx.stroke();
         } else if (plat.hasCollectible === 'frase') {
-          // Draw scroll / holy book
-          ctx.fillStyle = '#38bdf8'; // glowing cyan
+          // Scroll (📜)
+          ctx.fillStyle = '#38bdf8';
           ctx.fillRect(itemX - 5, itemY - 6, 10, 12);
-          
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(itemX - 3, itemY - 4, 6, 8);
-          // Little cross on book cover
           ctx.fillStyle = '#0284c7';
           ctx.fillRect(itemX - 1, itemY - 3, 2, 6);
           ctx.fillRect(itemX - 2, itemY - 2, 4, 2);
+        } else if (plat.hasCollectible === 'agua_benta') {
+          // Agua Benta (💧)
+          ctx.fillStyle = '#3b82f6';
+          ctx.beginPath();
+          ctx.moveTo(itemX, itemY - 7);
+          ctx.quadraticCurveTo(itemX - 5, itemY + 1, itemX - 5, itemY + 3);
+          ctx.arc(itemX, itemY + 3, 5, Math.PI, 0, true);
+          ctx.quadraticCurveTo(itemX + 5, itemY + 1, itemX, itemY - 7);
+          ctx.closePath();
+          ctx.fill();
+        } else if (plat.hasCollectible === 'hostia') {
+          // Hostia (white host disc with cross inside)
+          ctx.beginPath();
+          ctx.arc(itemX, itemY, 7, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.strokeStyle = '#d97706';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          
+          ctx.fillStyle = '#d97706';
+          ctx.fillRect(itemX - 1, itemY - 4, 2, 8);
+          ctx.fillRect(itemX - 3, itemY - 2, 6, 2);
+        } else if (plat.hasCollectible === 'cruz') {
+          // Cruz de São Bento (Red cross inside silver shield)
+          ctx.fillStyle = '#cbd5e1';
+          ctx.beginPath();
+          ctx.moveTo(itemX, itemY - 7);
+          ctx.lineTo(itemX + 6, itemY - 4);
+          ctx.lineTo(itemX + 6, itemY + 2);
+          ctx.quadraticCurveTo(itemX, itemY + 8, itemX - 6, itemY + 2);
+          ctx.lineTo(itemX - 6, itemY - 4);
+          ctx.closePath();
+          ctx.fill();
+          
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(itemX - 1.5, itemY - 4, 3, 8);
+          ctx.fillRect(itemX - 4, itemY - 1.5, 8, 3);
         }
       }
     });
@@ -847,7 +837,6 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       ctx.globalAlpha = alpha;
       
       if (p.type === 'cross') {
-        // Draw cross particle
         ctx.lineWidth = 2;
         ctx.strokeStyle = p.color;
         ctx.beginPath();
@@ -857,12 +846,16 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         ctx.lineTo(p.x + p.size * 0.7, p.y - p.size * 0.2);
         ctx.stroke();
       } else if (p.type === 'star') {
-        // Draw star particle
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
+      } else if (p.type === 'bubble') {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 1;
+        ctx.stroke();
       } else {
-        // Dust
         ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
       }
       ctx.globalAlpha = 1.0;
@@ -871,37 +864,29 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     // Draw Player (Character Sticker)
     const player = playerRef.current;
     
-    // Optional character shield/halo indicator (Irmã Dulce immunity)
-    if (player.hasShield) {
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+    // Power-up protective halo (Holy Water active or Shield active)
+    if (player.hasShield || player.holyWaterTime > 0) {
+      ctx.strokeStyle = player.holyWaterTime > 0 ? 'rgba(96, 165, 250, 0.7)' : 'rgba(239, 68, 68, 0.6)';
       ctx.lineWidth = 3;
       ctx.shadowBlur = 10;
-      ctx.shadowColor = '#38bdf8';
+      ctx.shadowColor = player.holyWaterTime > 0 ? '#60a5fa' : '#ef4444';
       ctx.beginPath();
       ctx.arc(player.x + player.width / 2, player.y + player.height / 2, Math.max(player.width, player.height) / 2 + 5, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.shadowBlur = 0; // reset
+      ctx.shadowBlur = 0;
     }
     
-    // Get preloaded image
     const charImg = charImagesRef.current[selectedCharId];
     if (charImg && charImg.complete && charImg.naturalWidth !== 0) {
-      // Draw image
       ctx.drawImage(charImg, player.x, player.y, player.width, player.height);
     } else {
-      // Fallback block character
       ctx.fillStyle = '#dd681f';
       ctx.fillRect(player.x, player.y, player.width, player.height);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(player.x + 8, player.y + 8, 8, 8);
-      ctx.fillRect(player.x + 22, player.y + 8, 8, 8);
     }
     
     ctx.restore();
     
-    // 3. DRAW SCREEN DETAILS (Fixed elements)
-    
-    // Score & Height HUD
+    // HUD Layout
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.fillRect(0, 0, canvas.width, 42);
     
@@ -911,7 +896,6 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
     ctx.fillText(`ALTURA: ${currentHeightRef.current}m`, 12, 18);
     ctx.fillText(`PONTOS: ${scoreRef.current}`, 12, 33);
     
-    // Terços HUD
     ctx.textAlign = 'right';
     ctx.fillStyle = '#facc15';
     ctx.fillText(`📿 x ${tercosInRunRef.current}`, canvas.width - 12, 18);
@@ -922,18 +906,17 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   
   // Touch Event Handlers
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (gameState !== 'playing') return;
+    if (gameStateRef.current !== 'playing') return;
     setControlType('touch');
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const touchX = e.touches[0].clientX - rect.left;
-    // scale touch coordinate to match internal canvas coordinates
     playerRef.current.targetX = (touchX / rect.width) * canvas.width;
   };
   
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (gameState !== 'playing') return;
+    if (gameStateRef.current !== 'playing') return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -943,8 +926,8 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   
   // Mouse Event Handlers
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (gameState !== 'playing') return;
-    if (controlType !== 'mouse') setControlType('mouse');
+    if (gameStateRef.current !== 'playing') return;
+    if (controlTypeRef.current !== 'mouse') setControlType('mouse');
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
@@ -955,7 +938,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   return (
     <div className="flex-1 flex flex-col justify-start relative h-full text-white overflow-hidden font-sans">
       
-      {/* 1. PLAYING GAMEPLAY SCREEN */}
+      {/* PLAYING GAMEPLAY SCREEN */}
       <div className="relative w-full h-[580px] bg-[#122340] shrink-0 border-b border-[#2e5aa8]/40">
         <canvas
           ref={canvasRef}
@@ -966,6 +949,21 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
           onMouseMove={handleMouseMove}
           className="w-full h-full bg-[#1b3b73] cursor-crosshair block"
         />
+        
+        {/* Active Power-up indicators overlays */}
+        {gameState === 'playing' && activePowerUps.length > 0 && (
+          <div className="absolute top-12 left-3 space-y-1.5 pointer-events-none z-30 select-none">
+            {activePowerUps.map((p, idx) => (
+              <div key={idx} className="bg-black/60 border border-white/10 px-2 py-0.5 rounded text-[8.5px] font-mono text-white flex items-center gap-1">
+                <span>{p.icon}</span>
+                <span>{p.name}</span>
+                {p.timeLeft < 900 && (
+                  <span className="text-yellow-400 font-bold ml-1">{p.timeLeft.toFixed(1)}s</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         
         {/* Tilt permission overlay for mobile */}
         {gameState === 'playing' && tiltSupported && controlType !== 'tilt' && (
@@ -982,7 +980,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         {gameState === 'playing' && (
           <div className="absolute top-12 left-0 right-0 text-center pointer-events-none z-30 select-none">
             <span className="inline-block bg-black/40 text-gray-400 px-2 py-0.5 text-[7px] font-mono uppercase tracking-widest rounded-full border border-white/5">
-              Controle: {controlType === 'mouse' && 'MOUSE'} {controlType === 'keyboard' && 'TECLADO (← →)'} {controlType === 'touch' && 'TOQUE (DESLIZAR)'} {controlType === 'tilt' && 'INCLINAÇÃO'}
+              Controle: {controlType === 'mouse' && 'MOUSE'} {controlType === 'keyboard' && 'TECLADO (← →)'} {controlType === 'touch' && 'TOQUE'} {controlType === 'tilt' && 'INCLINAÇÃO'}
             </span>
           </div>
         )}
@@ -991,7 +989,6 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         <AnimatePresence>
           {gameState === 'playing' && (
             <div className="absolute top-16 left-0 right-0 text-center pointer-events-none z-30 select-none">
-              {/* Trigger notification when level changes */}
               <LevelChangeNotification height={currentHeightRef.current} />
             </div>
           )}
@@ -1003,7 +1000,6 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
             
             {/* Title */}
             <div className="pt-6 relative">
-              {/* Halos effect */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-8 rounded-full border-2 border-yellow-300/40 blur-[1px] rotate-[-5deg] animate-pulse"></div>
               <h1 className="text-4xl font-extrabold tracking-tighter text-white uppercase italic drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
                 Rumo ao Céu!
@@ -1020,7 +1016,6 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
               </span>
               
               <div className="flex items-center justify-center gap-4">
-                {/* Character preview */}
                 <div className="bg-[#254b8c]/50 border-2 border-[#2e5aa8] p-4 w-52 rounded-2xl relative shadow-lg flex flex-col items-center">
                   <div className="h-28 flex items-center justify-center mb-3">
                     <motion.img
@@ -1047,27 +1042,21 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
                 </div>
               </div>
               
-              {/* Horizontal selection pills */}
+              {/* Character selection pills */}
               <div className="flex justify-center flex-wrap gap-1.5 max-w-[280px] mx-auto">
                 {characters.map(char => {
                   const isSelected = char.id === selectedCharId;
                   return (
                     <button
                       key={char.id}
-                      onClick={() => {
-                        if (char.unlocked) selectCharacter(char.id);
-                        else unlockCharacter(char);
-                      }}
-                      className={`px-2.5 py-1 text-[8.5px] font-mono uppercase tracking-wider transition-all border flex items-center gap-1 cursor-pointer ${
+                      onClick={() => selectCharacter(char.id)}
+                      className={`px-3 py-1.5 text-[8.5px] font-mono uppercase tracking-wider transition-all border flex items-center gap-1 cursor-pointer ${
                         isSelected
                           ? 'bg-[#dd681f] border-[#dd681f] text-white font-black'
-                          : char.unlocked
-                          ? 'bg-[#1b3b73] border-[#2e5aa8] text-gray-300'
-                          : 'bg-black/40 border-dashed border-gray-600 text-gray-500 hover:border-[#dd681f]/60 hover:text-white'
+                          : 'bg-[#1b3b73] border-[#2e5aa8] text-gray-300 hover:border-[#dd681f]'
                       }`}
                     >
                       {char.name.split(' ')[0]}
-                      {!char.unlocked && <span className="text-yellow-400">📿{char.cost}</span>}
                     </button>
                   );
                 })}
@@ -1085,122 +1074,21 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
                 onClick={startGame}
                 className="w-full bg-[#dd681f] hover:bg-white hover:text-[#1b3b73] text-white font-black py-4 px-6 rounded-2xl tracking-[0.2em] uppercase transition-all duration-300 shadow-[0_0_20px_rgba(221,104,31,0.5)] border border-[#dd681f]/40 cursor-pointer"
               >
-                JOGAR
+                COMEÇAR JOGO
               </button>
               
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setGameState('shop')}
-                  className="bg-[#254b8c] hover:bg-[#2e5aa8] border border-[#2e5aa8] text-white font-bold py-2.5 px-3 text-[10px] uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Icons.ShoppingBag className="w-3.5 h-3.5" />
-                  LOJA DE SANTOS
-                </button>
-                <button
-                  onClick={onBack}
-                  className="bg-transparent hover:bg-white/5 border border-white/20 text-white font-bold py-2.5 px-3 text-[10px] uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Icons.ArrowLeft className="w-3.5 h-3.5" />
-                  VOLTAR AO SITE
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* SHOP MODAL / VIEW */}
-        {gameState === 'shop' && (
-          <div className="absolute inset-0 bg-gradient-to-b from-[#1b3b73]/95 to-[#122340]/95 z-40 flex flex-col justify-between p-5 text-center overflow-y-auto no-scrollbar">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-[#2e5aa8]/40 pb-3">
-                <button
-                  onClick={() => setGameState('menu')}
-                  className="text-gray-400 hover:text-white text-[10px] uppercase font-black tracking-widest flex items-center gap-0.5 cursor-pointer"
-                >
-                  <Icons.ChevronLeft className="w-4 h-4" />
-                  Voltar
-                </button>
-                <span className="text-xs text-[#dd681f] font-black tracking-wider uppercase font-mono">
-                  SANTUÁRIO DE STICKERS
-                </span>
-                <span className="text-yellow-400 font-mono text-xs font-black">
-                  📿 {tercosWallet}
-                </span>
-              </div>
-              
-              <p className="text-[10px] text-gray-400 leading-relaxed font-sans uppercase font-medium">
-                Colete terços durante as subidas rumo ao céu e use-os para invocar o auxílio de santos e beatos intercessores!
-              </p>
-              
-              <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1 no-scrollbar pt-2">
-                {characters.map(char => (
-                  <div
-                    key={char.id}
-                    className={`flex items-center gap-3 p-3 bg-gradient-to-r ${
-                      char.unlocked ? 'from-[#254b8c]/50 to-[#254b8c]/20' : 'from-black/40 to-black/10'
-                    } border border-[#2e5aa8]/40 rounded-xl relative text-left`}
-                  >
-                    <img
-                      src={char.avatar}
-                      alt={char.name}
-                      className="w-12 h-14 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)] shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[11.5px] font-black text-white uppercase block leading-none">
-                        {char.name}
-                      </span>
-                      <span className="text-[8.5px] text-gray-400 mt-1.5 block leading-normal font-sans uppercase font-medium">
-                        {char.description}
-                      </span>
-                      <div className="flex gap-2 mt-1.5 text-[7.5px] font-mono text-gray-300 uppercase">
-                        <span>🏃 Vel: {Math.round(char.speedBoost * 100)}%</span>
-                        <span>🦘 Pulo: {Math.round(char.jumpBoost * 100)}%</span>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      {char.unlocked ? (
-                        <button
-                          onClick={() => {
-                            selectCharacter(char.id);
-                            setGameState('menu');
-                          }}
-                          className={`px-3 py-1.5 text-[8.5px] font-mono uppercase font-black tracking-wider transition-all border ${
-                            selectedCharId === char.id
-                              ? 'bg-[#dd681f] border-[#dd681f] text-white'
-                              : 'bg-transparent border-[#dd681f]/40 text-[#dd681f] hover:bg-[#dd681f] hover:text-white'
-                          }`}
-                        >
-                          {selectedCharId === char.id ? 'ATIVO' : 'USAR'}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => unlockCharacter(char)}
-                          disabled={tercosWallet < char.cost}
-                          className="px-2.5 py-1.5 bg-[#facc15] hover:bg-white text-black font-black text-[9px] font-mono uppercase tracking-wider flex flex-col items-center gap-0.5 border border-[#facc15] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                        >
-                          <span>DESBLOQUEAR</span>
-                          <span>📿 {char.cost}</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="pt-4 pb-2">
               <button
-                onClick={() => setGameState('menu')}
-                className="w-full bg-[#1b3b73] hover:bg-[#2e5aa8] border border-[#2e5aa8] text-white font-black py-3 text-xs tracking-wider uppercase cursor-pointer transition-all"
+                onClick={onBack}
+                className="w-full bg-transparent hover:bg-white/5 border border-white/20 text-white font-bold py-2.5 px-4 text-xs tracking-wider uppercase cursor-pointer transition-all flex items-center justify-center gap-1.5"
               >
-                FECHAR LOJA
+                <Icons.ArrowLeft className="w-4 h-4" />
+                VOLTAR AO SITE
               </button>
             </div>
           </div>
         )}
         
-        {/* GAMEOVER SCREEN OVERLAY */}
+        {/* GAMEOVER SCREEN OVERLAY - Removed rankings entirely */}
         {gameState === 'gameover' && (
           <div className="absolute inset-0 bg-gradient-to-b from-black/95 to-[#122340]/95 z-40 flex flex-col justify-between p-5 text-center overflow-y-auto no-scrollbar">
             <div className="space-y-4 pt-6">
@@ -1229,56 +1117,6 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
                   <span className="text-lg font-black text-yellow-400 font-mono mt-1 block">📿 {tercosCollected}</span>
                 </div>
               </div>
-              
-              {/* High Score input */}
-              {newHighScore ? (
-                <div className="bg-[#dd681f]/10 border-2 border-dashed border-[#dd681f]/40 p-4 space-y-3">
-                  <span className="text-[#facc15] font-black text-[9px] tracking-widest font-mono uppercase block animate-pulse">
-                    ⭐ NOVO RECORDE GLOBAL DA SEMANA! ⭐
-                  </span>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      maxLength={12}
-                      value={playerName}
-                      onChange={(e) => setPlayerName(e.target.value)}
-                      placeholder="Seu nome / Shalom"
-                      className="flex-1 bg-[#1b3b73]/60 border-2 border-[#2e5aa8] py-2 px-3 text-white text-xs placeholder-gray-500 focus:outline-none focus:border-[#dd681f] font-mono uppercase font-bold"
-                    />
-                    <button
-                      onClick={submitScore}
-                      disabled={!playerName.trim()}
-                      className="bg-[#25D366] hover:bg-[#1ebd59] text-white px-4 font-black text-xs uppercase cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      Gravar
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* Dynamic scoreboard leaderboard */
-                <div className="bg-black/30 border border-[#2e5aa8]/30 p-3 space-y-2 text-left">
-                  <span className="text-[8.5px] text-[#dd681f] font-black tracking-widest font-mono uppercase block text-center mb-1.5">
-                    🏆 RANKING RUMO AO CÉU 🏆
-                  </span>
-                  
-                  <div className="space-y-1.5">
-                    {leaderboard.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex justify-between items-center text-[10px] font-mono px-2 py-1 ${
-                          item.isPlayer ? 'bg-[#dd681f]/20 border border-[#dd681f]/40 text-yellow-300' : 'text-gray-300'
-                        }`}
-                      >
-                        <span className="font-bold flex gap-1.5">
-                          <span>{idx + 1}.</span>
-                          <span className="uppercase">{item.name}</span>
-                        </span>
-                        <span className="font-black text-white">{item.score} pts</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
             
             {/* Action buttons */}
@@ -1292,7 +1130,10 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
               </button>
               
               <button
-                onClick={() => setGameState('menu')}
+                onClick={() => {
+                  gameStateRef.current = 'menu';
+                  setGameState('menu');
+                }}
                 className="w-full bg-[#1b3b73] hover:bg-[#2e5aa8] border border-[#2e5aa8] text-white font-black py-2.5 px-4 rounded-xl text-xs tracking-wider uppercase cursor-pointer transition-all flex items-center justify-center gap-1.5"
               >
                 <Icons.Play className="w-4 h-4" />
@@ -1302,25 +1143,22 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
           </div>
         )}
         
-        {/* SAINT QUOTE GLASSMORPHIC POPUP MODAL */}
+        {/* SAINT QUOTE GLASSMORPHIC POPUP MODAL - Made background light for visibility */}
         <AnimatePresence>
           {showQuoteModal && activeQuote && (
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+            <div className="absolute inset-0 bg-black/35 backdrop-blur-[1.5px] z-50 flex items-center justify-center p-5">
               <motion.div
                 initial={{ scale: 0.8, y: 50, opacity: 0 }}
                 animate={{ scale: 1.0, y: 0, opacity: 1 }}
                 exit={{ scale: 0.8, y: 50, opacity: 0 }}
                 className="w-full max-w-[280px] bg-slate-900/90 border-2 border-yellow-500/40 p-5 rounded-3xl relative text-center shadow-2xl flex flex-col items-center"
               >
-                {/* Glowing halo indicator */}
                 <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-16 h-4 rounded-full border border-yellow-300/60 blur-[0.5px] rotate-[-5deg] animate-pulse bg-yellow-300/10"></div>
                 
-                {/* Saint Avatar placeholder / representation */}
                 <div className="w-14 h-14 bg-gradient-to-tr from-yellow-500/20 to-yellow-300/20 border border-yellow-400 rounded-full flex items-center justify-center text-yellow-400 text-2xl font-black mb-3 shadow-[0_0_12px_rgba(234,179,8,0.3)] select-none">
                   👼
                 </div>
                 
-                {/* Quote details */}
                 <span className="text-[8px] text-yellow-500 font-mono tracking-[0.25em] uppercase font-black block mb-2">
                   Palavra de Santidade
                 </span>
@@ -1335,7 +1173,6 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
                   {activeQuote.saint}
                 </span>
                 
-                {/* Dismiss button */}
                 <button
                   onClick={dismissQuoteModal}
                   className="w-full bg-[#dd681f] hover:bg-[#c25410] text-white font-black py-2.5 px-4 rounded-xl text-[10.5px] tracking-widest uppercase mt-4.5 cursor-pointer shadow-md transition-all active:scale-95 flex items-center justify-center gap-1"
@@ -1351,16 +1188,16 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   );
 }
 
-// Bouncing / Level change text notification
+// Level change text notification
 function LevelChangeNotification({ height }: { height: number }) {
   const [lastLevel, setLastLevel] = useState('Terra');
   const [show, setShow] = useState(false);
   
-  const currentLevelName = height < 1000 ? 'Terra'
-                         : height < 2000 ? 'Infância'
-                         : height < 3000 ? 'Juventude'
-                         : height < 4500 ? 'Vocação'
-                         : height < 6000 ? 'Santidade'
+  const currentLevelName = height < 2000 ? 'Terra'
+                         : height < 4500 ? 'Infância'
+                         : height < 7000 ? 'Juventude'
+                         : height < 10000 ? 'Vocação'
+                         : height < 13500 ? 'Santidade'
                          : 'Céu';
   
   useEffect(() => {
@@ -1383,7 +1220,7 @@ function LevelChangeNotification({ height }: { height: number }) {
       className="inline-block bg-[#dd681f] border-2 border-white/80 px-4 py-2 text-white font-black text-xs uppercase tracking-widest shadow-2xl relative"
     >
       <div className="absolute inset-0 bg-yellow-400 animate-ping opacity-25 rounded-none pointer-events-none"></div>
-      CHEGANDO NA {currentLevelName}! 😇
+      CHEGANDO NA {currentLevelName.toUpperCase()}! 😇
     </motion.div>
   );
 }
