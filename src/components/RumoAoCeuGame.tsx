@@ -71,9 +71,9 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   // Power-up active states (for UI rendering)
   const [activePowerUps, setActivePowerUps] = useState<{ name: string; timeLeft: number; icon: string }[]>([]);
   
-  // Saint Quote Modal
+  // Saint Quote Active Notification State
   const [activeQuote, setActiveQuote] = useState<SaintQuote | null>(null);
-  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const quoteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Controls settings
   const [controlType, setControlType] = useState<'mouse' | 'touch' | 'keyboard' | 'tilt'>('mouse');
@@ -85,17 +85,12 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   
   // REFS TO PREVENT CLOSURE BUGS IN GAMELOOP
   const gameStateRef = useRef<'menu' | 'playing' | 'gameover'>('menu');
-  const showQuoteModalRef = useRef<boolean>(false);
   const controlTypeRef = useRef<'mouse' | 'touch' | 'keyboard' | 'tilt'>('mouse');
   
   // Synchronize refs with state
   useEffect(() => {
     gameStateRef.current = gameState;
   }, [gameState]);
-  
-  useEffect(() => {
-    showQuoteModalRef.current = showQuoteModal;
-  }, [showQuoteModal]);
 
   useEffect(() => {
     controlTypeRef.current = controlType;
@@ -417,10 +412,8 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
       return;
     }
     
-    // 1. Only update physics if quote modal is NOT open
-    if (!showQuoteModalRef.current) {
-      updatePhysics();
-    }
+    // 1. UPDATE PHYSICS
+    updatePhysics();
     
     // 2. RENDER GRAPHICS
     renderGraphics(ctx);
@@ -671,14 +664,12 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   const triggerSaintQuote = () => {
     const randQuote = SAINT_QUOTES[Math.floor(Math.random() * SAINT_QUOTES.length)];
     setActiveQuote(randQuote);
-    setShowQuoteModal(true);
-    showQuoteModalRef.current = true;
-  };
-  
-  const dismissQuoteModal = () => {
-    setShowQuoteModal(false);
-    showQuoteModalRef.current = false;
-    setActiveQuote(null);
+    
+    // Auto-dismiss the quote notification after 5.5 seconds of gameplay
+    if (quoteTimeoutRef.current) clearTimeout(quoteTimeoutRef.current);
+    quoteTimeoutRef.current = setTimeout(() => {
+      setActiveQuote(null);
+    }, 5500);
   };
   
   const endGame = () => {
@@ -1144,44 +1135,28 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
           </div>
         )}
         
-        {/* SAINT QUOTE GLASSMORPHIC POPUP MODAL - Made background light for visibility */}
+        {/* Floating Saint Quote Toast Notification (Doesn't pause gameplay) */}
         <AnimatePresence>
-          {showQuoteModal && activeQuote && (
-            <div className="absolute inset-0 bg-black/35 backdrop-blur-[1.5px] z-50 flex items-center justify-center p-5">
-              <motion.div
-                initial={{ scale: 0.8, y: 50, opacity: 0 }}
-                animate={{ scale: 1.0, y: 0, opacity: 1 }}
-                exit={{ scale: 0.8, y: 50, opacity: 0 }}
-                className="w-full max-w-[280px] bg-slate-900/90 border-2 border-yellow-500/40 p-5 rounded-3xl relative text-center shadow-2xl flex flex-col items-center"
-              >
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-16 h-4 rounded-full border border-yellow-300/60 blur-[0.5px] rotate-[-5deg] animate-pulse bg-yellow-300/10"></div>
-                
-                <div className="w-14 h-14 bg-gradient-to-tr from-yellow-500/20 to-yellow-300/20 border border-yellow-400 rounded-full flex items-center justify-center text-yellow-400 text-2xl font-black mb-3 shadow-[0_0_12px_rgba(234,179,8,0.3)] select-none">
-                  👼
-                </div>
-                
-                <span className="text-[8px] text-yellow-500 font-mono tracking-[0.25em] uppercase font-black block mb-2">
-                  Palavra de Santidade
+          {activeQuote && (
+            <motion.div
+              initial={{ y: 80, opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: 30, opacity: 0, scale: 0.95 }}
+              transition={{ type: 'spring', damping: 15 }}
+              className="absolute bottom-4 left-3 right-3 bg-slate-955/90 border border-yellow-500/40 p-3.5 rounded-2xl shadow-2xl flex items-center gap-3.5 z-50 backdrop-blur-md"
+            >
+              <div className="w-10 h-10 bg-gradient-to-tr from-yellow-500/20 to-yellow-300/20 border border-yellow-400 rounded-full flex items-center justify-center text-yellow-400 text-lg shrink-0 select-none shadow-[0_0_8px_rgba(234,179,8,0.3)]">
+                👼
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <span className="text-[8px] text-yellow-400 font-mono tracking-widest uppercase font-black block leading-none mb-1">
+                  Frase de {activeQuote.saint}
                 </span>
-                
-                <p className="text-white text-xs font-serif font-bold italic leading-relaxed uppercase max-h-[140px] overflow-y-auto no-scrollbar px-1 py-1">
+                <p className="text-white text-[10px] font-serif font-bold italic leading-snug uppercase">
                   "{activeQuote.quote}"
                 </p>
-                
-                <div className="w-8 h-[1.5px] bg-[#dd681f] my-3 rounded-full"></div>
-                
-                <span className="text-[10px] text-gray-300 font-black tracking-wider uppercase font-sans">
-                  {activeQuote.saint}
-                </span>
-                
-                <button
-                  onClick={dismissQuoteModal}
-                  className="w-full bg-[#dd681f] hover:bg-[#c25410] text-white font-black py-2.5 px-4 rounded-xl text-[10.5px] tracking-widest uppercase mt-4.5 cursor-pointer shadow-md transition-all active:scale-95 flex items-center justify-center gap-1"
-                >
-                  Amém! 🙏
-                </button>
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
