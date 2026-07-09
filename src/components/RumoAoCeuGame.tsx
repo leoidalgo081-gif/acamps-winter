@@ -369,7 +369,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
   
   // Longer Vertical Zones
   const getZoneInfo = (height: number) => {
-    if (height < 3500) {
+    if (height < 6000) {
       return {
         name: 'Terra',
         gradientStart: '#1b3b73',
@@ -378,7 +378,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Partindo rumo ao alto!',
         textColor: '#e2f0d9'
       };
-    } else if (height < 7500) {
+    } else if (height < 13000) {
       return {
         name: 'Infância',
         gradientStart: '#254b8c',
@@ -387,7 +387,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Como crianças no colo do Pai.',
         textColor: '#fceade'
       };
-    } else if (height < 12000) {
+    } else if (height < 21000) {
       return {
         name: 'Juventude',
         gradientStart: '#90422c',
@@ -396,7 +396,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'O vigor de quem consagra seus dias.',
         textColor: '#ffebdb'
       };
-    } else if (height < 17000) {
+    } else if (height < 30000) {
       return {
         name: 'Vocação',
         gradientStart: '#43196c',
@@ -405,7 +405,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
         description: 'Escutando o chamado de amor.',
         textColor: '#fdf3d1'
       };
-    } else if (height < 23000) {
+    } else if (height < 40000) {
       return {
         name: 'Santidade',
         gradientStart: '#28114f',
@@ -559,14 +559,14 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
           player.y + player.height >= plat.y &&
           player.y + player.height - player.vy <= plat.y + 12
         ) {
-          const activeJumpMultiplier = player.holyWaterTime > 0 ? 1.35 : 1.0;
+          const activeJumpMultiplier = player.holyWaterTime > 0 ? 1.18 : 1.0;
           
           if (plat.type === 'breakable') {
             plat.broken = true;
             createExplosion(plat.x + plat.width / 2, plat.y + 6, '#b45309', 15, 'dust');
-            player.vy = -3;
+            player.vy = player.jumpStrength * 0.95 * activeJumpMultiplier; // Normal bounce before breaking!
           } else if (plat.type === 'boost') {
-            player.vy = player.jumpStrength * 1.8 * activeJumpMultiplier;
+            player.vy = player.jumpStrength * 1.45 * activeJumpMultiplier; // Slower boost launch
             createExplosion(player.x + player.width / 2, player.y + player.height, '#fbbf24', 25, 'star');
           } else {
             player.vy = player.jumpStrength * activeJumpMultiplier;
@@ -604,7 +604,7 @@ export default function RumoAoCeuGame({ onBack }: { onBack: () => void }) {
             player.holyWaterTime = 8.0;
             createExplosion(itemX, itemY, '#60a5fa', 22, 'bubble');
           } else if (type === 'hostia') {
-            player.vy = -16; // Propels a bit lower to match new speed
+            player.vy = -13.5; // Controlled rocket boost launch
             createExplosion(itemX, itemY, '#ffffff', 35, 'star');
           } else if (type === 'cruz') {
             player.hasShield = true;
@@ -1413,11 +1413,11 @@ function LevelChangeNotification({ height }: { height: number }) {
   const [lastLevel, setLastLevel] = useState('Terra');
   const [show, setShow] = useState(false);
   
-  const currentLevelName = height < 3500 ? 'Terra'
-                         : height < 7500 ? 'Infância'
-                         : height < 12000 ? 'Juventude'
-                         : height < 17000 ? 'Vocação'
-                         : height < 23000 ? 'Santidade'
+  const currentLevelName = height < 6000 ? 'Terra'
+                         : height < 13000 ? 'Infância'
+                         : height < 21000 ? 'Juventude'
+                         : height < 30000 ? 'Vocação'
+                         : height < 40000 ? 'Santidade'
                          : 'Céu';
   
   useEffect(() => {
